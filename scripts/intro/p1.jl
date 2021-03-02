@@ -38,7 +38,10 @@ end
 #       de activación por capa.
 #   inputs: matriz con los inputs del problema.
 #   trargets: matriz con los valores de salida deseados.
-#   stopping_cond: condiciones de parada para el entrenamiento.
+#   stopping_cond: condiciones de parada para el entrenamiento, es un Array
+#       en el que el primer elemento es el numero de iteraciones, el segundo
+#       error de entrenamiento de parada y el último la mínima modificación
+#       del error de entrenamiento.
 #
 # @return ann: red ya entrenada
 #
@@ -69,7 +72,17 @@ function newAnn(num_layers::Array, functions::Array, inputs::Array, targets::Arr
         ann = Chain(ann..., Dense(numInputsLayer, 1, σ));
     end
 
-    # entrenar la rnna
+    # nuestra función de loss (crossentropy)
+    loss(x, y) = Losses.crossentropy(ann(x), y)
+    # pesos y bías de la rna
+    ps = params(ann)
+    # condiciones de parada
+    iterations = stoping_conditions[1]
+    max_accurracy = stoping_conditions[2]
+    min_error_value = stoping_conditions[3]
+
+    # entrena la rna "iterations" veces o "iterations" epochs según los de Flux          # aquí va el valor de accurracy de la rna 
+    @epochs iterations Flux.train!(loss, ps, [(inputs', targets')], ADAM(0.01), cb = function () 0.9 > 0.9 && Flux.stop() end);
 
     return ann;
 
@@ -79,24 +92,24 @@ end
 # función de activación reLu de teoría
 relu(x) = max(0, x)
 
+# número máximo de iteraciones, accurracy máximo, modificación del error
+stoping_conditions = [20, 0.9, 0]
+
 # creo una rna con 2 capas ocultas, 4 neuronas en la capa de entrada (pq en el
 # dataset de iris tenemos 4 valores para categorizar) y 5 en la primera capa
 # oculta, y 8 en la segunda capa oculta. Además de la capa de salida con 3
 # neuronas (3 clases). Además, a cada capa oculta se le pasa su función de
 # transferencia no tiene por qué ser la funcion Sigmoid, podemos usar relu o
 # cualquier otra funcion.
-ann = newAnn([5, 8], [σ, relu], inputs, targets, [])
+ann = newAnn([5, 8], [σ, relu], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
 # si entrena 1 iteracción es que funciona :)
-loss(x, y) = Losses.crossentropy(ann(x), y)
-Flux.train!(loss, params(ann), [(inputs', targets')], ADAM(0.01));
 #Flux.train!(loss, params(ann2), [(inputs', targets')], ADAM(0.01))
-
-# entrena la rna 3 veces -> 3 "epochs" según los de Flux
-@epochs 3 Flux.train!(loss, params(ann), [(inputs', targets')], ADAM(0.01));
 
 
 # TO-DO:
-#   entrenar la rna dentro del bucle
+#   falta definir una función que haga earlystopping porque el error o loss de
+#   entrenamiento es lo suficientemente bueno o la modificación del error de
+#   entrenamiento es inferior a un valor prefijado
