@@ -1,6 +1,7 @@
 using DelimitedFiles
 using Flux
 using Flux.Losses
+using Flux: @epochs
 include("intro_v2.jl")
 
 #
@@ -72,7 +73,11 @@ ann2 = newAnn([], inputs, targets, [])
 # si entrena 1 iteracción es que funciona :)
 loss(x, y) = Losses.crossentropy(ann(x), y)
 Flux.train!(loss, params(ann), [(inputs', targets')], ADAM(0.01));
-Flux.train!(loss, params(ann2), [(inputs', targets')], ADAM(0.01));
+Flux.train!(loss, params(ann2), [(inputs', targets')], ADAM(0.01))
+
+# entrena la rna 3 veces -> 3 "epochs" según los de Flux
+@epochs 3 Flux.train!(loss, params(ann), [(inputs', targets')], ADAM(0.01));
+
 
 # TO-DO:
 #   entrenar la rna dentro del bucle
