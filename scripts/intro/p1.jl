@@ -1,25 +1,6 @@
 using DelimitedFiles
-using Flux: Chain, Dense, σ, softmax, onehotbatch, onecold, crossentropy, throttle, params, ADAM, train!, stop, @epochs
+using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
 include("intro_v2.jl")
-
-
-#
-#  Esta función auxiliar para añadir una capa oculta a la red neuronal.
-#
-# @args:
-#   hidden_neurons: número de neuronas de la capa oculta que estamos creando.
-#   activation_function: función de activación para la capa.
-#
-function load_hidden_layers(hidden_neurons::Any, activation_function::Any)
-    # ann y numInputsLayer van a ser referenciadas fuera del bucle, entonces
-    # hace falta ponerle "global"
-    global ann, numInputsLayer
-    # añade una capa oculta a la rna que ya teníamos
-    ann = Chain(ann..., Dense(numInputsLayer, hidden_neurons, activation_function));
-    # seguimos iterando, añadido el último valor de neuronas para ponerlo en la
-    # siguiente capa y que puedan conectarse.
-    numInputsLayer = hidden_neurons;
-end
 
 
 #
@@ -50,16 +31,10 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
 
     # creamos una rna
     ann = Chain();
-    # num_layers = topology[1]
-    # functions = topology[2]
     # miramos cuantas entradas tiene nuestro problema
     numInputsLayer = size(inputs,2)
-    # si el número de capas es diferente al de neuronas de activación no podemos
-    # entrenar.
-    # @assert (size(topology[1]) == size(topology[2]))
     # le pasamos a la función el número de capas junto con sus funciones de
     # activación
-    # load_hidden_layers.(num_layers,functions)
     for tuple = topology
         numOuputsLayer = tuple[1]
         activation_function = tuple[2]
@@ -88,17 +63,10 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     iterations = stoping_conditions[1]
     max_accurracy = stoping_conditions[2]
     min_error_value = stoping_conditions[3]
-    # una forma para detectar lo bien que estamos aproximando
-    # accuracy(x, y) = mean(onecold(ann(x)) .== onecold(y)) no lo podemos usar
+    # esto es para que saque por pantalla el error de crossentropy en cada it.
     evalcb = () -> @show(loss(inputs', targets'))
-    #stopping_function = function ()
-    #    println("xd")
-    #end
-    #function ()
-    #  accuracy() > 0.9 && Flux.stop()
-    #end
-    # entrena la rna "iterations" veces o "iterations" epochs según los de Flux
-    # @epochs iterations train!(loss, ps, [(inputs', targets')], opt, cb = evalcb);
+
+    # comenzamos el bucle para entrenar la rna
     best_ann = ann
     best_loss = loss(inputs', targets')
     actual_loss = loss(inputs', targets')
@@ -106,6 +74,8 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
         mod_err = actual_loss
         train!(loss, ps, [(inputs', targets')], opt, cb = evalcb);
         actual_loss = loss(inputs', targets')
+        # si el error de loss de la última iteracción es mejor que el mejor que
+        # hemos error registrado, actualizamos nuestra red
         if (best_loss > actual_loss)
             best_loss = actual_loss
             best_ann = ann
@@ -115,6 +85,8 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
         @show(iterations)
         @show(mod_err)
         iterations-=1
+        # si nos pasamos de iteraciones, o la precisión es superior a un máximo
+        # prefijado, o la modificación del error es demasiado baja, salimos
         if ((iterations < 0) || (actual_loss < max_accurracy) || (mod_err < min_error_value))
             break
         end
@@ -122,8 +94,8 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     ann = best_ann
     @show(best_loss)
     @show(loss(inputs', targets'))
-    return ann;
 
+    return ann;
 end
 
 
@@ -143,11 +115,7 @@ ann = newAnn([(5, σ); (8, relu)], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
-# si entrena 1 iteracción es que funciona :)
-#Flux.train!(loss, params(ann2), [(inputs', targets')], ADAM(0.01))
 
 
 # TO-DO:
-#   falta definir una función que haga earlystopping porque el error o loss de
-#   entrenamiento es lo suficientemente bueno o la modificación del error de
-#   entrenamiento es inferior a un valor prefijado
+#
