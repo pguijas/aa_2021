@@ -2,6 +2,14 @@ using DelimitedFiles
 using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
 include("p0.jl")
 
+# DUDAS:
+#   el global es solo si no esta dentro de una func no?????
+#   los parametros de parada en un array no es demasiado engorroso?¿?, yo veo bien que sean un parametro
+
+# Cosas:
+#   falta la preciosion
+#   falta la normalización
+
 
 #
 #  Esta función debe recibir la topología (número de capas y neuronas y
