@@ -1,6 +1,6 @@
 using DelimitedFiles
 using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
-include("intro_v2.jl")
+include("p0.jl")
 
 
 #
