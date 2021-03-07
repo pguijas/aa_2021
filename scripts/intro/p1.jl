@@ -5,11 +5,36 @@ include("p0.jl")
 # DUDAS:
 #   el global es solo si no esta dentro de una func no?????
 #   los parametros de parada en un array no es demasiado engorroso?¿?, yo veo bien que sean un parametro
+#   en vez de trasponer cosas y no tenerlo ya en la forma en la que trabaja julia, mejor poner ya a patrones x columna en vez de x fila y trabajar con eso
+
+# Curiosidades
+#   ¿sabeis xq julia trabaja con patrones x columna y no por fila? 
+#       porque el orden secuencial de una matriz a[i] recorre las columnas y cuando las acaba pasa a la siguente columna de la siguiente fila
+
 
 # Cosas:
-#   falta la preciosion
+#   falta la preciosion: falta pasar los resultados de la ann(inputs) (Array{Float32}) a (Array{Bool)
 #   falta la normalización
 
+
+#Para trasponer y que quede con el tipo adecuado:
+#convert(Array{Bool}, targets')
+
+# Precondición: salida en columnas columna, patrones en filas-> ojo a si trasponer o no
+function precision(targets::Array, outputs::Array)
+    #Comprobamos que sean del mismo tamaño
+    @assert (size(targets) == size(outputs))
+    if size(targets,2)<size(targets,1)
+        println("Hermano, te has olvidado de trasponer la matriz")
+    end
+    n_patrones=size(targets,2)
+    #Comparamos arrays
+    comp= targets.==outputs
+    #Aquí lo que hacemos es mirar que coincidan las salidas para todas las calses, si hay algun 0 no coincidirá :(
+    correctos = all(comp, dims=1)
+    #Calculamos precision
+    return count(correctos)/n_patrones
+end
 
 #
 #  Esta función debe recibir la topología (número de capas y neuronas y
