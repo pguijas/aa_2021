@@ -1,5 +1,5 @@
 using DelimitedFiles
-using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
+using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!
 include("intro_v2.jl")
 
 
@@ -99,11 +99,26 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
 end
 
 
+# Esta función se encarga de medir la precisión entre las salidas de una rna
+#   y las salidas deseadas para un problema de clasificación. Básicamente es
+#   la siguiente fórmula (VN + VP) / (VN + FN + VP + FP) -> (VN + VP) / len(targets).
+#
+# @args:
+#   output: la salida de la rna, codificada como one-hot-encoding.
+#   target: las salidas deseadas que queremos que tome la red.
+#
+# @return: precisión entre las salidas deseadas y las de la rna.
+function measure_accuracy(output, target)
+    @assert size(output) == size(target)
+    return sum(output .== target) / length(target)
+end
+
+
 # función de activación reLu de teoría
 relu(x) = max(0, x)
 
 # número máximo de iteraciones, accurracy máximo, modificación del error
-stoping_conditions = [20, 0.9, 0]
+stoping_conditions = [200, 0.9, 0]
 
 # creo una rna con 2 capas ocultas, 4 neuronas en la capa de entrada (pq en el
 # dataset de iris tenemos 4 valores para categorizar) y 5 en la primera capa
@@ -111,11 +126,16 @@ stoping_conditions = [20, 0.9, 0]
 # neuronas (3 clases). Además, a cada capa oculta se le pasa su función de
 # transferencia no tiene por qué ser la funcion Sigmoid, podemos usar relu o
 # cualquier otra funcion.
-ann = newAnn([(5, σ); (8, relu)], inputs, targets, stoping_conditions)
+ann = newAnn([(5, σ); (8, σ)], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
+# medimos la precision entre los targets
+precision = measure_accuracy(targets', targets')
 
+# probamos para una neurona de salida
+x = [true, false, false, true]
+precision = measure_accuracy(x, x)
 
 # TO-DO:
-#
+#   acabar p2
