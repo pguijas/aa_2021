@@ -1,5 +1,5 @@
 using DelimitedFiles
-using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
+using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
 include("p0.jl")
 
 # DUDAS:
@@ -21,17 +21,24 @@ include("p0.jl")
 #convert(Array{Bool}, targets')
 
 # Precondición: salida en columnas columna, patrones en filas-> ojo a si trasponer o no
-function precision(targets::Array, outputs::Array)
+function precision(targets::Array, outputs::Array, is_transpose::Bool)
     #Comprobamos que sean del mismo tamaño
     @assert (size(targets) == size(outputs))
-    if size(targets,2)<size(targets,1)
-        println("Hermano, te has olvidado de trasponer la matriz")
+    #if size(targets,2)<size(targets,1)
+    #    println("Hermano, te has olvidado de trasponer la matriz")
+    #end
+    if is_transpose
+        i = 2
+        j = 1
+    else
+        i = 1
+        j = 2
     end
-    n_patrones=size(targets,2)
+    n_patrones=size(targets,i)
     #Comparamos arrays
     comp= targets.==outputs
     #Aquí lo que hacemos es mirar que coincidan las salidas para todas las calses, si hay algun 0 no coincidirá :(
-    correctos = all(comp, dims=1)
+    correctos = all(comp, dims=j)
     #Calculamos precision
     return count(correctos)/n_patrones
 end
@@ -57,7 +64,7 @@ end
 #
 # @return ann: red ya entrenada
 #
-function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::Any)
+function newAnn!(topology::Array, inputs::Array, targets::Array, stoping_cond::Any)
     # ann y numInputsLayer van a ser referenciadas fuera del bucle, entonces
     # hace falta ponerle "global"
     global ann, numInputsLayer
@@ -87,7 +94,7 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     end
 
     # nuestra función de loss (crossentropy)
-    loss(x, y) = crossentropy(ann(x), y)
+    loss(x, y) = (size(y,1) == 1) ? binarycrossentropy(ann(x),y) : crossentropy(ann(x),y);
     # pesos y bías de la rna
     ps = params(ann)
     # gradiente descentiente stochastic ADAM (optimizador)
@@ -127,25 +134,44 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     ann = best_ann
     @show(best_loss)
     @show(loss(inputs, targets))
-
-    return ann;
 end
 
-# Esta función se encarga de medir la precisión entre las salidas de una rna
-#   y las salidas deseadas para un problema de clasificación. Básicamente es
-#   la siguiente fórmula (VN + VP) / (VN + FN + VP + FP) -> (VN + VP) / len(targets).
+
+# función auxiliar que normaliza entre max y min, para poder vectorizar
+m(v, max, min) = (v - min)/(max - min)
+
+
+# Esta función se encarga de normalizar las entradas para una rna. Utiliza la
+#   normalización entre máximo y mínimo.
 #
 # @args:
-#   output: la salida de la rna, codificada como one-hot-encoding.
-#   target: las salidas deseadas que queremos que tome la red.
+#   inputs: las entradas de la rna.
+#   is_transpose: si la matriz es traspuesta o no.
 #
-# @return: precisión entre las salidas deseadas y las de la rna.
+# @return: matriz normalizada.
 #
-function measure_accuracy(output::Array, target::Array)
-    @assert size(output) == size(target)
-    return sum(output .== target) / length(target)
+function max_min_norm!(inputs::Array, is_transpose::Bool)
+    global inputs
+    cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
+    result = []
+    i = 1
+    while (i<=cols) # hay que vectorizar esto, pero no se me ocurre aun como
+        row = inputs[i, :]
+        max = maximum(row)
+        min = minimum(row)
+        if result == []
+            result = transpose(m.(row,max,min))
+        else
+            result = [result; transpose(m.(row,max,min))]
+        end
+        i+=1
+    end
+    inputs = result
 end
 
+
+max_min_norm!(inputs,true);
+@show(inputs);
 
 # función de activación reLu de teoría
 relu(x) = max(0, x)
@@ -159,16 +185,20 @@ stoping_conditions = [200, 0.9, 0]
 # neuronas (3 clases). Además, a cada capa oculta se le pasa su función de
 # transferencia no tiene por qué ser la funcion Sigmoid, podemos usar relu o
 # cualquier otra funcion.
-ann = newAnn([(5, σ); (8, σ)], inputs, targets, stoping_conditions)
+newAnn!([(5, σ); (8, relu)], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
+
 x = [1  0  0; 1  0  0; 1  0  0; 1  0  0]
 y = [0  0  0; 1  0  0; 1  0  0; 1  0  0]
+@show(precision(x,y,false))
 x = convert(Array{Bool,2}, x')
 y = convert(Array{Bool,2}, y')
 
-precision(x,y)
+@show(precision(x,y,true))
+
+
 
 # TO-DO:
 #   acabar p2
