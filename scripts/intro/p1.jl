@@ -1,11 +1,6 @@
-using DelimitedFiles
-<<<<<<< HEAD
-using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!
-include("intro_v2.jl")
-=======
+using DelimitedF
 using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
 include("p0.jl")
->>>>>>> 43d23364dcdf30f7509e971285eb6a8beb7d2ebf
 
 # DUDAS:
 #   el global es solo si no esta dentro de una func no?????
