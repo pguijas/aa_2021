@@ -1,4 +1,4 @@
-using DelimitedF
+using DelimitedFiles
 using Flux: Chain, Dense, σ, softmax, onehotbatch, crossentropy, params, ADAM, train!, stop
 include("p0.jl")
 
@@ -65,7 +65,7 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     # creamos una rna
     ann = Chain();
     # miramos cuantas entradas tiene nuestro problema
-    numInputsLayer = size(inputs,2)
+    numInputsLayer = size(inputs,1)
     # le pasamos a la función el número de capas junto con sus funciones de
     # activación
     for tuple = topology
@@ -75,7 +75,7 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
         numInputsLayer = numOuputsLayer;
     end
     # miramos las clases de salida que tiene nuestro problema
-    output_layers = size(targets,2)
+    output_layers = size(targets,1)
 
     # si tiene más de dos clases usamos una neurona de salida por clase
     if (output_layers > 1)
@@ -97,16 +97,16 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     max_accurracy = stoping_conditions[2]
     min_error_value = stoping_conditions[3]
     # esto es para que saque por pantalla el error de crossentropy en cada it.
-    evalcb = () -> @show(loss(inputs', targets'))
+    evalcb = () -> @show(loss(inputs, targets))
 
     # comenzamos el bucle para entrenar la rna
     best_ann = ann
-    best_loss = loss(inputs', targets')
-    actual_loss = loss(inputs', targets')
+    best_loss = loss(inputs, targets)
+    actual_loss = best_loss
     while (true)
         mod_err = actual_loss
-        train!(loss, ps, [(inputs', targets')], opt, cb = evalcb);
-        actual_loss = loss(inputs', targets')
+        train!(loss, ps, [(inputs, targets)], opt, cb = evalcb);
+        actual_loss = loss(inputs, targets)
         # si el error de loss de la última iteracción es mejor que el mejor que
         # hemos error registrado, actualizamos nuestra red
         if (best_loss > actual_loss)
@@ -126,11 +126,10 @@ function newAnn(topology::Array, inputs::Array, targets::Array, stoping_cond::An
     end
     ann = best_ann
     @show(best_loss)
-    @show(loss(inputs', targets'))
+    @show(loss(inputs, targets))
 
     return ann;
 end
-
 
 # Esta función se encarga de medir la precisión entre las salidas de una rna
 #   y las salidas deseadas para un problema de clasificación. Básicamente es
@@ -141,7 +140,8 @@ end
 #   target: las salidas deseadas que queremos que tome la red.
 #
 # @return: precisión entre las salidas deseadas y las de la rna.
-function measure_accuracy(output, target)
+#
+function measure_accuracy(output::Array, target::Array)
     @assert size(output) == size(target)
     return sum(output .== target) / length(target)
 end
@@ -163,12 +163,12 @@ ann = newAnn([(5, σ); (8, σ)], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
-# medimos la precision entre los targets
-precision = measure_accuracy(targets', targets')
+x = [1  0  0; 1  0  0; 1  0  0; 1  0  0]
+y = [0  0  0; 1  0  0; 1  0  0; 1  0  0]
+x = convert(Array{Bool,2}, x')
+y = convert(Array{Bool,2}, y')
 
-# probamos para una neurona de salida
-x = [true, false, false, true]
-precision = measure_accuracy(x, x)
+precision(x,y)
 
 # TO-DO:
 #   acabar p2

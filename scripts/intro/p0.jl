@@ -54,3 +54,7 @@ targets = normalize(targets)
 
 # Programación defensiva (checkeando condición)
 @assert (size(inputs,1) == size(targets,1))
+
+# para no tener que hacer más la traspuesta
+inputs = convert(Array{Float64,2}, inputs')
+targets = convert(Array{Bool,2}, targets')
