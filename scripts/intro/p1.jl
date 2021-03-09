@@ -1,5 +1,5 @@
 using DelimitedFiles
-using Statistics: mean
+using Statistics: mean, std
 using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
 include("p0.jl")
 
@@ -21,9 +21,6 @@ include("p0.jl")
 
 # función auxiliar que normaliza entre max y min, para poder vectorizar
 max_min_ecuation(v, max, min) = (v - min)/(max - min)
-
-# función auxiliar que hace media 0
-m_0_ecuation(v, μ, σ) = (v - μ)/σ
 
 # Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
 #   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
@@ -62,6 +59,9 @@ function max_min_norm!(inputs::Array, is_transpose::Bool)
 end
 
 
+# función auxiliar que hace media 0
+m_0_ecuation(v, μ, σ) = (v - μ)/σ
+
 # Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
 #   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
 #
@@ -74,9 +74,9 @@ function aux_m_0(row_num)
     max = maximum(row)
     min = minimum(row)
     if result == []
-        result = transpose(m_0_ecuation.(row,mean(row),min))
+        result = transpose(m_0_ecuation.(row,mean(row),std(row)))
     else
-        result = [result; transpose(m_0_ecuation.(row,mean(row),min))]
+        result = [result; transpose(m_0_ecuation.(row,mean(row),std(row)))]
     end
 end
 
