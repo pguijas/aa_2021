@@ -43,6 +43,13 @@ function precision(targets::Array, outputs::Array, is_transpose::Bool)
     return count(correctos)/n_patrones
 end
 
+
+# Podemos usar esto para medir la precisión cuando solo haya una neurona de salida
+function binary_precision(output::Array, target::Array)
+    @assert size(output) == size(target)
+    return sum(output .== target) / length(target)
+end
+
 #
 #  Esta función debe recibir la topología (número de capas y neuronas y
 #   funciones de activación en cada capa), conjunto de entrenamiento, y
@@ -171,7 +178,6 @@ end
 
 
 max_min_norm!(inputs,true);
-@show(inputs);
 
 # función de activación reLu de teoría
 relu(x) = max(0, x)
