@@ -1,4 +1,5 @@
 using DelimitedFiles
+using Statistics: mean
 using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
 include("p0.jl")
 
@@ -19,7 +20,10 @@ include("p0.jl")
 
 
 # función auxiliar que normaliza entre max y min, para poder vectorizar
-m(v, max, min) = (v - min)/(max - min)
+max_min_ecuation(v, max, min) = (v - min)/(max - min)
+
+# función auxiliar que hace media 0
+m_0_ecuation(v, μ, σ) = (v - μ)/σ
 
 # Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
 #   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
@@ -33,9 +37,9 @@ function aux_max_min(row_num)
     max = maximum(row)
     min = minimum(row)
     if result == []
-        result = transpose(m.(row,max,min))
+        result = transpose(max_min_ecuation.(row,max,min))
     else
-        result = [result; transpose(m.(row,max,min))]
+        result = [result; transpose(max_min_ecuation.(row,max,min))]
     end
 end
 
@@ -54,6 +58,43 @@ function max_min_norm!(inputs::Array, is_transpose::Bool)
     result = []
     size_vector = [1:1:cols;]'
     aux_max_min.(size_vector)
+    inputs = result
+end
+
+
+# Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
+#   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
+#
+# @args:
+#   row_num: el número de fila.
+#
+function aux_m_0(row_num)
+    global result
+    row = inputs[row_num, :]
+    max = maximum(row)
+    min = minimum(row)
+    if result == []
+        result = transpose(m_0_ecuation.(row,mean(row),min))
+    else
+        result = [result; transpose(m_0_ecuation.(row,mean(row),min))]
+    end
+end
+
+# Esta función se encarga de normalizar las entradas para una rna. Utiliza la
+#   normalización entre máximo y mínimo.
+#
+# @args:
+#   inputs: las entradas de la rna.
+#   is_transpose: si la matriz es traspuesta o no.
+#
+# @return: matriz normalizada.
+#
+function m_0_norm!(inputs::Array, is_transpose::Bool)
+    global inputs, result
+    cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
+    result = []
+    size_vector = [1:1:cols;]'
+    aux_m_0.(size_vector)
     inputs = result
 end
 
@@ -89,6 +130,7 @@ function binary_precision(output::Array, target::Array)
     @assert size(output) == size(target)
     return sum(output .== target) / length(target)
 end
+
 
 #
 #  Esta función debe recibir la topología (número de capas y neuronas y
