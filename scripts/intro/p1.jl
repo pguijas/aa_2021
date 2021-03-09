@@ -17,6 +17,47 @@ include("p0.jl")
 #   falta la normalización
 
 
+
+# función auxiliar que normaliza entre max y min, para poder vectorizar
+m(v, max, min) = (v - min)/(max - min)
+
+# Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
+#   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
+#
+# @args:
+#   row_num: el número de fila.
+#
+function aux_max_min(row_num)
+    global result
+    row = inputs[row_num, :]
+    max = maximum(row)
+    min = minimum(row)
+    if result == []
+        result = transpose(m.(row,max,min))
+    else
+        result = [result; transpose(m.(row,max,min))]
+    end
+end
+
+# Esta función se encarga de normalizar las entradas para una rna. Utiliza la
+#   normalización entre máximo y mínimo.
+#
+# @args:
+#   inputs: las entradas de la rna.
+#   is_transpose: si la matriz es traspuesta o no.
+#
+# @return: matriz normalizada.
+#
+function max_min_norm!(inputs::Array, is_transpose::Bool)
+    global inputs, result
+    cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
+    result = []
+    size_vector = [1:1:cols;]'
+    aux_max_min.(size_vector)
+    inputs = result
+end
+
+
 #Para trasponer y que quede con el tipo adecuado:
 #convert(Array{Bool}, targets')
 
@@ -42,7 +83,6 @@ function precision(targets::Array, outputs::Array, is_transpose::Bool)
     #Calculamos precision
     return count(correctos)/n_patrones
 end
-
 
 # Podemos usar esto para medir la precisión cuando solo haya una neurona de salida
 function binary_precision(output::Array, target::Array)
@@ -144,39 +184,10 @@ function newAnn!(topology::Array, inputs::Array, targets::Array, stoping_cond::A
 end
 
 
-# función auxiliar que normaliza entre max y min, para poder vectorizar
-m(v, max, min) = (v - min)/(max - min)
 
+# parte de pruebas, para ver que todo funciona
 
-# Esta función se encarga de normalizar las entradas para una rna. Utiliza la
-#   normalización entre máximo y mínimo.
-#
-# @args:
-#   inputs: las entradas de la rna.
-#   is_transpose: si la matriz es traspuesta o no.
-#
-# @return: matriz normalizada.
-#
-function max_min_norm!(inputs::Array, is_transpose::Bool)
-    global inputs
-    cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
-    result = []
-    i = 1
-    while (i<=cols) # hay que vectorizar esto, pero no se me ocurre aun como
-        row = inputs[i, :]
-        max = maximum(row)
-        min = minimum(row)
-        if result == []
-            result = transpose(m.(row,max,min))
-        else
-            result = [result; transpose(m.(row,max,min))]
-        end
-        i+=1
-    end
-    inputs = result
-end
-
-
+# Normalizamos los datos entre máximo y mínimo
 max_min_norm!(inputs,true);
 
 # función de activación reLu de teoría
