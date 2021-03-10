@@ -3,6 +3,12 @@ using Statistics: mean, std
 using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
 include("p0.jl")
 
+# IMPORTANTE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# TO-DO:
+#   Revisar todos
+#   Hacer stopping conditions más intuitivo y q se pueda poner más restr.
+
+
 # DUDAS:
 #   el global es solo si no esta dentro de una func no?????
 #   los parametros de parada en un array no es demasiado engorroso?¿?, yo veo bien que sean un parametro
@@ -20,26 +26,24 @@ include("p0.jl")
 
 
 # función auxiliar que normaliza entre max y min, para poder vectorizar
-max_min_ecuation(v, max, min) = (v - min)/(max - min)
+max_min_ecuation(v::Number, max::Number, min::Number) = (v - min)/(max - min)
 
+#
 # Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
 #   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
 #
 # @args:
 #   row_num: el número de fila.
 #
-function aux_max_min(row_num)
+function max_min_aux(row_num::Int64, is_transpose::Bool)
     global result
-    row = inputs[row_num, :]
+    row = (is_transpose) ? inputs[row_num, :] : inputs[:, row_num]
     max = maximum(row)
     min = minimum(row)
-    if result == []
-        result = transpose(max_min_ecuation.(row,max,min))
-    else
-        result = [result; transpose(max_min_ecuation.(row,max,min))]
-    end
+    result = (result == []) ? max_min_ecuation.(row,max,min) : [result max_min_ecuation.(row,max,min)]
 end
 
+#
 # Esta función se encarga de normalizar las entradas para una rna. Utiliza la
 #   normalización entre máximo y mínimo.
 #
@@ -49,37 +53,35 @@ end
 #
 # @return: matriz normalizada.
 #
-function max_min_norm!(inputs::Array, is_transpose::Bool)
+function max_min_norm!(inputs::Array{Float64,2}, is_transpose::Bool)
     global inputs, result
     cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
     result = []
-    size_vector = [1:1:cols;]'
-    aux_max_min.(size_vector)
-    inputs = result
+    size_vector = [1:1:cols;]
+    max_min_aux.(size_vector,is_transpose)
+    inputs = convert(Array{Float64,2}, result')
 end
 
 
 # función auxiliar que hace media 0
-m_0_ecuation(v, μ, σ) = (v - μ)/σ
+m_0_ecuation(v::Number, μ::Number, σ::Number) = (v - μ)/σ
 
+#
 # Función auxiliar para poder vectorizar el código. Utiliza inputs y result de
 #   la función anterior, por eso ponemos "global". Ambas de pasan por referencia.
 #
 # @args:
 #   row_num: el número de fila.
 #
-function aux_m_0(row_num)
+function m_0_aux(row_num::Int64, is_transpose::Bool)
     global result
-    row = inputs[row_num, :]
-    max = maximum(row)
-    min = minimum(row)
-    if result == []
-        result = transpose(m_0_ecuation.(row,mean(row),std(row)))
-    else
-        result = [result; transpose(m_0_ecuation.(row,mean(row),std(row)))]
-    end
+    row = (is_transpose) ? inputs[row_num, :] : inputs[:, row_num]
+    media = mean(row)
+    des_tip = std(row)
+    result = (result == []) ? m_0_ecuation.(row,media,des_tip) : [result m_0_ecuation.(row,media,des_tip)]
 end
 
+#
 # Esta función se encarga de normalizar las entradas para una rna. Utiliza la
 #   normalización entre máximo y mínimo.
 #
@@ -89,13 +91,13 @@ end
 #
 # @return: matriz normalizada.
 #
-function m_0_norm!(inputs::Array, is_transpose::Bool)
+function m_0_norm!(inputs::Array{Float64,2}, is_transpose::Bool)
     global inputs, result
     cols = (is_transpose) ? size(inputs,1) : size(inputs,2)
     result = []
-    size_vector = [1:1:cols;]'
-    aux_m_0.(size_vector)
-    inputs = result
+    size_vector = [1:1:cols;]
+    m_0_aux.(size_vector, is_transpose)
+    inputs = convert(Array{Float64,2}, result')
 end
 
 
@@ -103,32 +105,21 @@ end
 #convert(Array{Bool}, targets')
 
 # Precondición: salida en columnas columna, patrones en filas-> ojo a si trasponer o no
-function precision(targets::Array, outputs::Array, is_transpose::Bool)
+function precision(targets::Array{Bool,2}, outputs::Array{Float64,2}, is_transpose::Bool)
     #Comprobamos que sean del mismo tamaño
     @assert (size(targets) == size(outputs))
-    #if size(targets,2)<size(targets,1)
-    #    println("Hermano, te has olvidado de trasponer la matriz")
-    #end
-    if is_transpose
-        i = 2
-        j = 1
-    else
-        i = 1
-        j = 2
+    i = (is_transpose) ? 2 : 1
+    j = (is_transpose) ? 1 : 2
+    n_patrones = size(targets,i)
+    if (size(targets,j)) == 1
+        return sum(outputs .== targets) / n_patrones
     end
-    n_patrones=size(targets,i)
     #Comparamos arrays
-    comp= targets.==outputs
+    comp = targets.==outputs
     #Aquí lo que hacemos es mirar que coincidan las salidas para todas las calses, si hay algun 0 no coincidirá :(
     correctos = all(comp, dims=j)
     #Calculamos precision
     return count(correctos)/n_patrones
-end
-
-# Podemos usar esto para medir la precisión cuando solo haya una neurona de salida
-function binary_precision(output::Array, target::Array)
-    @assert size(output) == size(target)
-    return sum(output .== target) / length(target)
 end
 
 
@@ -153,7 +144,7 @@ end
 #
 # @return ann: red ya entrenada
 #
-function newAnn!(topology::Array, inputs::Array, targets::Array, stoping_cond::Any)
+function newAnn!(topology::Array, inputs::Array{Float64,2}, targets::Array{Bool,2}, stoping_cond::Any)
     # ann y numInputsLayer van a ser referenciadas fuera del bucle, entonces
     # hace falta ponerle "global"
     global ann, numInputsLayer
@@ -229,8 +220,9 @@ end
 
 # parte de pruebas, para ver que todo funciona
 
-# Normalizamos los datos entre máximo y mínimo
-max_min_norm!(inputs,true);
+# Normalizamos los datos
+#max_min_norm!(inputs,true);
+m_0_norm!(inputs,true);
 
 # función de activación reLu de teoría
 relu(x) = max(0, x)
@@ -244,20 +236,26 @@ stoping_conditions = [200, 0.9, 0]
 # neuronas (3 clases). Además, a cada capa oculta se le pasa su función de
 # transferencia no tiene por qué ser la funcion Sigmoid, podemos usar relu o
 # cualquier otra funcion.
+#newAnn!([(5, σ); (8, relu)], convert(Array{Float64,2}, inputs'), convert(Array{Bool,2}, targets'), stoping_conditions)
 newAnn!([(5, σ); (8, relu)], inputs, targets, stoping_conditions)
 # neurona sin capas ocultas
 #ann2 = newAnn([], inputs, targets, [])
 
 
-x = [1  0  0; 1  0  0; 1  0  0; 1  0  0]
-y = [0  0  0; 1  0  0; 1  0  0; 1  0  0]
-@show(precision(x,y,false))
-x = convert(Array{Bool,2}, x')
-y = convert(Array{Bool,2}, y')
+#x = [1  0  0; 1  0  0; 1  0  0; 1  0  0]
+#y = [0  0  0; 1  0  0; 1  0  0; 1  0  0]
+#@show(precision(x,y,false))
+#x = convert(Array{Bool,2}, x')
+#y = convert(Array{Bool,2}, y')
 
-@show(precision(x,y,true))
+#x = [1; 1; 1; 1]
+#y = [0; 1; 1; 1]
+#@show(precision(x,y,false))
 
+#outputs = ann(inputs')
+outputs = ann(inputs)
+# wtf
+@show(outputs)
 
-
-# TO-DO:
-#   acabar p2
+#@show(precision(convert(Array{Bool,2}, targets'),outputs,true))
+@show(precision(convert(Array{Bool,2}, targets),outputs,true))
