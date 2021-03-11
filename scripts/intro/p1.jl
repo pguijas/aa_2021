@@ -105,7 +105,7 @@ end
 #convert(Array{Bool}, targets')
 
 # Precondición: salida en columnas columna, patrones en filas-> ojo a si trasponer o no
-function precision(targets::Array{Bool,2}, outputs::Array{Float64,2}, is_transpose::Bool)
+function precision(targets::Array{Bool,2}, outputs::Array, is_transpose::Bool)
     #Comprobamos que sean del mismo tamaño
     @assert (size(targets) == size(outputs))
     i = (is_transpose) ? 2 : 1
