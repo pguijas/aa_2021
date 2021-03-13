@@ -31,8 +31,7 @@ validationTargets = targets[validationIndices,:];
 testTargets       = targets[testIndices,:];
 
 # Y creamos y entrenamos la RNA con los parametros dados
-(ann, trainingLosses, trainingAccuracies) = trainClassANN(topology,
-    trainingInputs,   trainingTargets,
-    validationInputs, validationTargets,
-    testInputs,       testTargets;
-    maxEpochs=numMaxEpochs, learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
+(ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
+validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
+                                            validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
+                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
