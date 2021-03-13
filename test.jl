@@ -1,5 +1,5 @@
-include("datasets.jl")
-include("rna.jl")
+include("modulos/datasets.jl")
+include("modulos/rna.jl")
 
 
 # Parametros principales de la RNA y del proceso de entrenamiento
@@ -11,7 +11,7 @@ testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 # Cargamos el dataset
-dataset = readdlm("../scripts/intro/iris.data",',');
+dataset = readdlm("datasets/iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
