@@ -2,12 +2,13 @@
 # datasets.jl -> Funciones útiles aplicables a un dataset:
 #   - oneHotEncoding
 #   - normalizar:
-#       -get norm params
-#       -normalize
+#       -calculateMinMaxNormalizationParameters
+#       -normalizeMinMax!
+#       -calculateZeroMeanNormalizationParameters
+#       -normalizeZeroMean!
 #   - holdOut (sobrecargada 2 y 3 params)
-#   - precision no pinta nada aquí
+#   - validacion cruzada(añadir en un futuro)
 # =============================================================================
-
 
 using FileIO;
 using DelimitedFiles;
@@ -17,6 +18,7 @@ using Random: randperm;
 # =============================================================================
 # Transformar dataset en formato adecuado (oneHotEncoding)
 # =============================================================================
+
 
 #
 # Esta función sirve para normalizar las salidas deseadas del dataset para un
@@ -49,99 +51,6 @@ oneHotEncoding(feature::Array{Bool,1}) = feature;
 # =============================================================================
 # Funciones útiles para la normalización de un dataset
 # =============================================================================
-
-
-#
-# Función que calcula la precision entre dos arrays de booleanos.
-#
-# @arguments
-#   outputs: salidas.
-#   targets: salidas deseadas.
-#
-# @return: similitud entre los arrays.
-#
-accuracy(outputs::Array{Bool,1}, targets::Array{Bool,1}) = mean(outputs.==targets);
-
-#
-# Función que calcula la precision entre dos arrays multiclase.
-#
-# @arguments
-#   outputs: salidas.
-#   targets: salidas deseadas.
-#
-# @return: similitud entre los arrays.
-#
-function accuracy(outputs::Array{Bool,2}, targets::Array{Bool,2}; dataInRows::Bool=true)
-    @assert(all(size(outputs).==size(targets)));
-    if (dataInRows)
-        # Cada patron esta en cada fila
-        if (size(targets,2)==1)
-            return accuracy(outputs[:,1], targets[:,1]);
-        else
-            classComparison = targets .== outputs
-            correctClassifications = all(classComparison, dims=2)
-            return mean(correctClassifications)
-        end;
-    else
-        # Cada patron esta en cada columna
-        if (size(targets,1)==1)
-            return accuracy(outputs[1,:], targets[1,:]);
-        else
-            classComparison = targets .== outputs
-            correctClassifications = all(classComparison, dims=1)
-            return mean(correctClassifications)
-        end;
-    end;
-end;
-
-#
-# Función que calcula la precision entre dos arrays numéricos.
-#
-# @arguments
-#   outputs: salidas.
-#   targets: salidas deseadas.
-#
-# @return: similitud entre los arrays.
-#
-accuracy(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = accuracy(Array{Bool,1}(outputs.>=threshold), targets);
-
-#
-# Función que calcula la precision entre dos matrices numéricas.
-#
-# @arguments
-#   outputs: salidas.
-#   targets: salidas deseadas.
-#
-# @return: similitud de las matrices.
-#
-function accuracy(outputs::Array{Float64,2}, targets::Array{Bool,2}; dataInRows::Bool=true)
-    @assert(all(size(outputs).==size(targets)));
-    if (dataInRows)
-        # Cada patron esta en cada fila
-        if (size(targets,2)==1)
-            return accuracy(outputs[:,1], targets[:,1]);
-        else
-            vmax = maximum(outputs, dims=2);
-            outputs = Array{Bool,2}(outputs .== vmax);
-            return accuracy(outputs, targets);
-        end;
-    else
-        # Cada patron esta en cada columna
-        if (size(targets,1)==1)
-            return accuracy(outputs[1,:], targets[1,:]);
-        else
-            vmax = maximum(outputs, dims=1)
-            outputs = Array{Bool,2}(outputs .== vmax)
-            return accuracy(outputs, targets; dataInRows=false);
-        end;
-    end;
-end;
-
-# Añado estas funciones porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
-# Con estas funciones se pueden usar indistintamente matrices de Float32 o Float64
-accuracy(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = accuracy(Float64.(outputs), targets; threshold=threshold);
-accuracy(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = accuracy(Float64.(outputs), targets; dataInRows=dataInRows);
-
 
 
 #
@@ -228,7 +137,9 @@ end;
 #
 normalizeZeroMean!(dataset::Array{Float64,2}; dataInRows=true) = normalizeZeroMean!(dataset, calculateZeroMeanNormalizationParameters(dataset; dataInRows=dataInRows); dataInRows=dataInRows);
 
-
+# =============================================================================
+# Obtener los conjuntos discuntos adecuados (holdOut)
+# =============================================================================
 
 #
 # Función que divide el conjunto de entrenamiento en entrenamiento y test.
