@@ -3,6 +3,11 @@ include("modulos/graphics.jl")
 include("modulos/datasets.jl")
 include("modulos/rna.jl")
 
+
+#RECORDAR:
+#   Para revisar que esté todo bien mostrar gráficos del codigo del 
+#   profe y el nuestro, conjunto test tintinea un poco
+
 # Cargamos el dataset
 dataset = readdlm("datasets/iris.data",',');
 # Preparamos las entradas y las salidas deseadas
@@ -26,7 +31,7 @@ testTargets       = targets[testIndices,:];
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
-numMaxEpochs = 5000; # Numero maximo de ciclos de entrenamiento
+numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion
 testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento

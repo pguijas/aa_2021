@@ -32,7 +32,7 @@ oneHotEncoding(feature::Array{Bool,1}) = feature;
 # Ejemplo de uso de estas funciones:
 
 # Cargamos el dataset
-dataset = readdlm("iris.data",',');
+dataset = readdlm("datasets/iris.data",',');
 
 # Preparamos las entradas
 inputs = dataset[:,1:4];
@@ -503,7 +503,7 @@ numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 
 # Cargamos el dataset
-dataset = readdlm("iris.data",',');
+dataset = readdlm("datasets/iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -544,7 +544,7 @@ testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 # Cargamos el dataset
-dataset = readdlm("iris.data",',');
+dataset = readdlm("datasets/iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -564,7 +564,7 @@ validationTargets = targets[validationIndices,:];
 testTargets       = targets[testIndices,:];
 
 # Y creamos y entrenamos la RNA con los parametros dados
-(ann, trainingLosses, trainingAccuracies) = trainClassANN(topology,
+(ann, trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies) = trainClassANN(topology,
     trainingInputs,   trainingTargets,
     validationInputs, validationTargets,
     testInputs,       testTargets;
