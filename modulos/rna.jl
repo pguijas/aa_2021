@@ -53,7 +53,7 @@ end;
 #   maxEpochsVal: número máximo de iteraciones sin mejorar en el conjunto de validacion.
 #   showText: saca por pantalla el texto si es cierto
 #
-# @return: rna entrenada.
+# @return: rna entrenada. ¿¿home devolverá mais cousiñas non??? mucha mariconada esta inspiración en los javadocs
 #
 function trainClassANN(topology::Array{Int64,1}, trainingInputs::Array{Float64,2}, trainingTargets::Array{Bool,2},
     validationInputs::Array{Float64,2}, validationTargets::Array{Bool,2}, testInputs::Array{Float64,2}, testTargets::Array{Bool,2};
@@ -103,7 +103,11 @@ function trainClassANN(topology::Array{Int64,1}, trainingInputs::Array{Float64,2
         testAcc = accuracy(Array{Float64,2}(testOutputs'), testTargets; dataInRows=true);
         # Mostramos por pantalla el resultado de este ciclo de entrenamiento si nos lo han indicado
         if showText
-            println("Epoch ", numEpoch, ": Training loss: ", trainingLoss, ", accuracy: ", 100*trainingAcc, " % - Validation loss: ", validationLoss, ", accuracy: ", 100*validationAcc, " % - Test loss: ", testLoss, ", accuracy: ", 100*testAcc, " %");
+            #println("Epoch ", numEpoch, ": Training loss: ", trainingLoss, ", accuracy: ", 100*trainingAcc, " % - Validation loss: ", validationLoss, ", accuracy: ", 100*validationAcc, " % - Test loss: ", testLoss, ", accuracy: ", 100*testAcc, " %");
+            println("Epoch ", numEpoch);
+            println("\t Training loss: ", trainingLoss, ", accuracy: ", 100*trainingAcc);
+            println("\t Validation loss: ", validationLoss, ", accuracy: ", 100*validationAcc);
+            println("\t Test loss: ", testLoss, ", accuracy: ", 100*testAcc);
         end;
         return (trainingLoss, trainingAcc, validationLoss, validationAcc, testLoss, testAcc)
     end;
