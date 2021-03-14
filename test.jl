@@ -1,6 +1,7 @@
+include("modulos/bondad.jl")
+include("modulos/graphics.jl")
 include("modulos/datasets.jl")
 include("modulos/rna.jl")
-
 
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda

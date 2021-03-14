@@ -1,13 +1,22 @@
 # =============================================================================
-# Funciones útiles para tratar con un dataset
+# datasets.jl -> Funciones útiles aplicables a un dataset:
+#   - oneHotEncoding
+#   - normalizar:
+#       -get norm params
+#       -normalize
+#   - holdOut (sobrecargada 2 y 3 params)
+#   - precision no pinta nada aquí
 # =============================================================================
+
 
 using FileIO;
 using DelimitedFiles;
 using Statistics: mean, std;
 using Random: randperm;
 
-
+# =============================================================================
+# Transformar dataset en formato adecuado (oneHotEncoding)
+# =============================================================================
 
 #
 # Esta función sirve para normalizar las salidas deseadas del dataset para un
@@ -36,6 +45,10 @@ end;
 # en caso de que ya sea un array de bools con una sola salida, lo devolvemos
 oneHotEncoding(feature::Array{Bool,1}) = feature;
 
+
+# =============================================================================
+# Funciones útiles para la normalización de un dataset
+# =============================================================================
 
 
 #

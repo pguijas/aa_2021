@@ -1,10 +1,10 @@
 # =============================================================================
-# Funciones útiles para crear y entrenar una rna
+# rna.jl -> Funciones útiles para crear y entrenar RNAs:
+#   - buildClassANN
+#   - trainClassANN
 # =============================================================================
 
 using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
-
-
 
 #
 # Función que crea una rna según la topología que se le indica.
@@ -23,6 +23,7 @@ function buildClassANN(numInputs::Int64, topology::Array{Int64,1}, numOutputs::I
         ann = Chain(ann..., Dense(numInputsLayer, numOutputLayers, σ));
         numInputsLayer = numOutputLayers;
     end;
+    #Dependiendo del nº de salidas añadimos las capas de salida adecuadas
     if (numOutputs == 1)
         ann = Chain(ann..., Dense(numInputsLayer, 1, σ));
     else
