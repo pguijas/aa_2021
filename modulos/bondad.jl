@@ -63,3 +63,47 @@ end;
 accuracy(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = accuracy(Float64.(outputs), targets; threshold=threshold);
 accuracy(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = accuracy(Float64.(outputs), targets; dataInRows=dataInRows);
 
+
+#Confusion 1 clase
+function confusionMatrix(outputs::Array{Bool,1}, targets::Array{Bool,1})
+    @assert(all(size(outputs).==size(targets)));
+    #Matriz de confusión: filas(reales) columnas(predicciones)
+    matriz=convert(Array{Int},zeros(2,2))
+    for i in 1:size(outputs,1)
+        if (targets[i])
+            real=2
+        else
+            real=1
+        end
+        if (outputs[i])
+            prediccion=2
+        else
+            prediccion=1
+        end
+        matriz[real,prediccion]=matriz[real,prediccion]+1
+    end
+    return matriz
+end
+
+function primero_que_cumple(array::Array{Bool,1})
+    for i in 1:size(array,1)
+        if (array[i])
+            return i
+        end
+    end
+end
+
+#Confusion +1 clase, de momento trabajo con patrones x columnas
+function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2})
+    @assert(all(size(outputs).==size(targets)));
+    #Matriz de confusión: filas(reales) columnas(predicciones)
+    #comprobar si realmente es de 1d
+    matriz=convert(Array{Int},zeros(size(outputs,1),size(outputs,1)))
+    for i in 1:size(outputs,1)
+        #buscar alguna func del palo de dame el indice del elemento que sea true
+        real=primero_que_cumple(targets[:,1])
+        prediccion=primero_que_cumple(targets[:,1])
+        matriz[real,prediccion]=matriz[real,prediccion]+1
+    end
+    return matriz
+end

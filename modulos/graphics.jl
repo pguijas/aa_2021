@@ -17,6 +17,3 @@ function print_train_results(
     ylabel!("% Accuracies")
     plot(losses,accuracy)
 end
-
-
-print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies)
