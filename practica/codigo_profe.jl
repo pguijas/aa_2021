@@ -5,14 +5,18 @@
 using FileIO;
 using DelimitedFiles;
 
-function oneHotEncoding(feature::Array{Any,1})
-    classes = unique(feature);
+# Funcion para realizar la codificacion, recibe el vector de caracteristicas (uno por patron), y las clases
+function oneHotEncoding(feature::Array{Any,1}, classes::Array{Any,1})
+    # Primero se comprueba que todos los elementos del vector esten en el vector de clases (linea adaptada del final de la practica 4)
+    @assert(all([in(value, classes) for value in feature]));
     numClasses = length(classes);
     @assert(numClasses>1)
     if (numClasses==2)
+        # Si solo hay dos clases, se devuelve una matriz con una columna
         oneHot = Array{Bool,2}(undef, size(feature,1), 1);
         oneHot[:,1] .= (feature.==classes[1]);
     else
+        # Si hay mas de dos clases se devuelve una matriz con una columna por clase
         oneHot = Array{Bool,2}(undef, size(feature,1), numClasses);
         for numClass = 1:numClasses
             oneHot[:,numClass] .= (feature.==classes[numClass]);
@@ -20,11 +24,13 @@ function oneHotEncoding(feature::Array{Any,1})
     end;
     return oneHot;
 end;
+# Esta funcion es similar a la anterior, pero si no es especifican las clases, se toman de la propia variable
+oneHotEncoding(feature::Array{Any,1}) = oneHotEncoding(feature::Array{Any,1}, unique(feature));
 # Sobrecargamos la funcion oneHotEncoding por si acaso pasan un vector de valores booleanos
 #  En este caso, el propio vector ya está codificado
-# Cuando se llame a la funcion oneHotEncoding, según el tipo del argumento pasado, Julia realizará
-#  la llamada a la función de arriba o esta
 oneHotEncoding(feature::Array{Bool,1}) = feature;
+# Cuando se llame a la funcion oneHotEncoding, según el tipo del argumento pasado, Julia realizará
+#  la llamada a la función correspondiente
 
 
 
@@ -76,6 +82,23 @@ using Flux.Losses
 
 
 # -------------------------------------------------------
+# Funciones auxiliar que permite transformar una matriz de
+#  valores reales con las salidas del clasificador o clasificadores
+#  en una matriz de valores booleanos con la clase en la que sera clasificada
+function classifyOutputs(outputs::Array{Float64,2}; dataInRows::Bool=true)
+    # Miramos donde esta el valor mayor de cada instancia con la funcion findmax
+    (_,indicesMaxEachInstance) = findmax(outputs, dims= dataInRows ? 2 : 1);
+    # Creamos la matriz de valores booleanos con valores inicialmente a false y asignamos esos indices a true
+    outputsBoolean = Array{Bool,2}(falses(size(outputs)));
+    outputsBoolean[indicesMaxEachInstance] .= true;
+    # Comprobamos que efectivamente cada patron solo este clasificado en una clase
+    @assert(all(sum(outputsBoolean, dims=dataInRows ? 2 : 1).==1));
+    return outputsBoolean;
+end;
+
+
+
+# -------------------------------------------------------
 # Funciones para calcular la precision
 
 accuracy(outputs::Array{Bool,1}, targets::Array{Bool,1}) = mean(outputs.==targets);
@@ -110,18 +133,14 @@ function accuracy(outputs::Array{Float64,2}, targets::Array{Bool,2}; dataInRows:
         if (size(targets,2)==1)
             return accuracy(outputs[:,1], targets[:,1]);
         else
-            vmax = maximum(outputs, dims=2);
-            outputs = Array{Bool,2}(outputs .== vmax);
-            return accuracy(outputs, targets);
+            return accuracy(classifyOutputs(outputs; dataInRows=true), targets);
         end;
     else
         # Cada patron esta en cada columna
         if (size(targets,1)==1)
             return accuracy(outputs[1,:], targets[1,:]);
         else
-            vmax = maximum(outputs, dims=1)
-            outputs = Array{Bool,2}(outputs .== vmax)
-            return accuracy(outputs, targets; dataInRows=false);
+            return accuracy(classifyOutputs(outputs; dataInRows=false), targets);
         end;
     end;
 end;
@@ -274,6 +293,12 @@ topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
 numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 
+# Cargamos el dataset
+dataset = readdlm("datasets/iris.data",',');
+# Preparamos las entradas y las salidas deseadas
+inputs = convert(Array{Float64,2}, dataset[:,1:4]);
+targets = oneHotEncoding(dataset[:,5]);
+
 # Comprobamos que las funciones de normalizar funcionan correctamente
 # Normalizacion entre maximo y minimo
 newInputs = normalizeMinMax(inputs);
@@ -288,6 +313,15 @@ newInputs = normalizeZeroMean(inputs);
 normalizeMinMax!(inputs);
 # Y creamos y entrenamos la RNA con los parametros dados
 (ann, trainingLosses, trainingAccuracies) = trainClassANN(topology, inputs, targets; maxEpochs=numMaxEpochs, learningRate=learningRate);
+
+
+
+
+
+
+
+
+
 
 
 
@@ -564,8 +598,275 @@ validationTargets = targets[validationIndices,:];
 testTargets       = targets[testIndices,:];
 
 # Y creamos y entrenamos la RNA con los parametros dados
-(ann, trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies) = trainClassANN(topology,
+(ann, trainingLosses, trainingAccuracies) = trainClassANN(topology,
     trainingInputs,   trainingTargets,
     validationInputs, validationTargets,
     testInputs,       testTargets;
     maxEpochs=numMaxEpochs, learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------
+# ------------------------------------- Practica 4 ---------------------------------------------
+# ----------------------------------------------------------------------------------------------
+
+function confusionMatrix(outputs::Array{Bool,1}, targets::Array{Bool,1})
+    @assert(length(outputs)==length(targets));
+    @assert(length(outputs)==length(targets));
+    # Para calcular la precision y la tasa de error, se puede llamar a las funciones definidas en la practica 2
+    acc         = accuracy(outputs, targets); # Precision, definida previamente en una practica anterior
+    errorRate   = 1 - acc;
+    recall      = mean(  outputs[  targets]); # Sensibilidad
+    specificity = mean(.!outputs[.!targets]); # Especificidad
+    precision   = mean(  targets[  outputs]); # Valor predictivo positivo
+    NPV         = mean(.!targets[.!outputs]); # Valor predictivo negativo
+    # Controlamos que algunos casos pueden ser NaN, y otros no
+    @assert(!isnan(recall) && !isnan(specificity));
+    precision   = isnan(precision) ? 0 : precision;
+    NPV         = isnan(NPV) ? 0 : NPV;
+    # Calculamos F1
+    F1          = (recall==precision==0.) ? 0. : 2*(recall*precision)/(recall+precision);
+    # Reservamos memoria para la matriz de confusion
+    confMatrix = Array{Int64,2}(undef, 2, 2);
+    # Ponemos en las filas los que pertenecen a cada clase (targets) y en las columnas los clasificados (outputs)
+    #  Primera fila/columna: negativos
+    #  Segunda fila/columna: positivos
+    # Primera fila: patrones de clase negativo, clasificados como negativos o positivos
+    confMatrix[1,1] = sum(.!targets .& .!outputs); # VN
+    confMatrix[1,2] = sum(.!targets .&   outputs); # FP
+    # Segunda fila: patrones de clase positiva, clasificados como negativos o positivos
+    confMatrix[2,1] = sum(  targets .& .!outputs); # FN
+    confMatrix[2,2] = sum(  targets .&   outputs); # VP
+    return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix)
+end;
+
+confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
+
+
+function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
+    @assert(size(outputs)==size(targets));
+    numClasses = size(targets,2);
+    # Nos aseguramos de que no hay dos columnas
+    @assert(numClasses!=2);
+    if (numClasses==1)
+        return confusionMatrix(outputs[:,1], targets[:,1]);
+    else
+        # Nos aseguramos de que en cada fila haya uno y sólo un valor a true
+        @assert(all(sum(outputs, dims=2).==1));
+        # Reservamos memoria para las metricas de cada clase
+        recall      = Array{Float64,1}(undef, numClasses);
+        specificity = Array{Float64,1}(undef, numClasses);
+        precision   = Array{Float64,1}(undef, numClasses);
+        NPV         = Array{Float64,1}(undef, numClasses);
+        F1          = Array{Float64,1}(undef, numClasses);
+        # Reservamos memoria para la matriz de confusion
+        confMatrix  = Array{Int64,2}(undef, numClasses, numClasses);
+        # Calculamos estos valores para cada clase
+        for numClass in 1:numClasses
+            # Calculamos las metricas de cada problema binario correspondiente a cada clase y las almacenamos en los vectores correspondientes
+            (_, _, recall[numClass], specificity[numClass], precision[numClass], NPV[numClass], F1[numClass], _) = confusionMatrix(outputs[:,numClass], targets[:,numClass]);
+        end;
+
+        # Reservamos memoria para la matriz de confusion
+        confMatrix = Array{Int64,2}(undef, numClasses, numClasses);
+        # Calculamos la matriz de confusión haciendo un bucle doble que itere sobre las clases
+        for numClassTarget in 1:numClasses, numClassOutput in 1:numClasses
+            # Igual que antes, ponemos en las filas los que pertenecen a cada clase (targets) y en las columnas los clasificados (outputs)
+            confMatrix[numClassTarget, numClassOutput] = sum(targets[:,numClassTarget] .& outputs[:,numClassOutput]);
+        end;
+
+        # Aplicamos las forma de combinar las metricas macro o weighted
+        if weighted
+            # Calculamos el numero de patrones de cada clase y los valores de ponderacion para hacer el promedio
+            numInstancesFromEachClass = vec(sum(targets, dims=1));
+            weights = numInstancesFromEachClass./sum(numInstancesFromEachClass);
+            recall      = sum(weights.*recall);
+            specificity = sum(weights.*specificity);
+            precision   = sum(weights.*precision);
+            NPV         = sum(weights.*NPV);
+            F1          = sum(weights.*F1);
+        else
+            recall      = mean(recall);
+            specificity = mean(specificity);
+            precision   = mean(precision);
+            NPV         = mean(NPV);
+            F1          = mean(F1);
+        end;
+        # Precision y tasa de error las calculamos con las funciones definidas previamente
+        acc = accuracy(outputs, targets; dataInRows=true);
+        errorRate = 1 - acc;
+
+        return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
+    end;
+end;
+
+function confusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
+    # Comprobamos que todas las clases de salida esten dentro de las clases de las salidas deseadas
+    @assert(all([in(output, unique(targets)) for output in outputs]));
+    classes = unique(targets);
+    # Es importante calcular el vector de clases primero y pasarlo como argumento a las 2 llamadas a oneHotEncoding para que el orden de las clases sea el mismo en ambas matrices
+    return confusionMatrix(oneHotEncoding(outputs, classes), oneHotEncoding(targets, classes); weighted=weighted);
+end;
+
+confusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(classifyOutputs(outputs), targets; weighted=weighted);
+
+# De forma similar a la anterior, añado estas funcion porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
+# Con estas funcion se pueden usar indistintamente matrices de Float32 o Float64
+confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
+printConfusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
+
+# Funciones auxiliares para visualizar por pantalla la matriz de confusion y las metricas que se derivan de ella
+function printConfusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
+    (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix) = confusionMatrix(outputs, targets; weighted=weighted);
+    numClasses = size(confMatrix,1);
+    writeHorizontalLine() = (for i in 1:numClasses+1 print("--------") end; println(""); );
+    writeHorizontalLine();
+    print("\t| ");
+    if (numClasses==2)
+        println(" - \t + \t|");
+    else
+        print.("Cl. ", 1:numClasses, "\t| ");
+    end;
+    println("");
+    writeHorizontalLine();
+    for numClassTarget in 1:numClasses
+        # print.(confMatrix[numClassTarget,:], "\t");
+        if (numClasses==2)
+            print(numClassTarget == 1 ? " - \t| " : " + \t| ");
+        else
+            print("Cl. ", numClassTarget, "\t| ");
+        end;
+        print.(confMatrix[numClassTarget,:], "\t| ");
+        println("");
+        writeHorizontalLine();
+    end;
+    println("Accuracy: ", acc);
+    println("Error rate: ", errorRate);
+    println("Recall: ", recall);
+    println("Specificity: ", specificity);
+    println("Precision: ", precision);
+    println("Negative predictive value: ", NPV);
+    println("F1-score: ", F1);
+    return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
+end;
+printConfusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix(classifyOutputs(outputs), targets; weighted=weighted)
+
+
+# -------------------------------------------------------------------------
+# Para probar estas funciones, partimos de los resultados del entrenamiento de la practica anterior
+
+println("Results in the training set:")
+trainingOutputs = collect(ann(trainingInputs')');
+printConfusionMatrix(trainingOutputs, trainingTargets; weighted=true);
+println("Results in the validation set:")
+validationOutputs = collect(ann(validationInputs')');
+printConfusionMatrix(validationOutputs, validationTargets; weighted=true);
+println("Results in the test set:")
+testOutputs = collect(ann(testInputs')');
+printConfusionMatrix(testOutputs, testTargets; weighted=true);
+println("Results in the whole dataset:")
+outputs = collect(ann(inputs')');
+printConfusionMatrix(outputs, targets; weighted=true);
+
+
+
+# -------------------------------------------------------------------------
+# Estrategia "uno contra todos" y código de ejemplo:
+
+function oneVSall(inputs::Array{Float64,2}, targets::Array{Bool,2})
+    numClasses = size(targets,2);
+    # Nos aseguramos de que hay mas de dos clases
+    @assert(numClasses>2);
+    outputs = Array{Float64,2}(undef, size(inputs,1), numClasses);
+    for numClass in 1:numClasses
+        model = fit(inputs, targets[:,[numClass]]);
+        outputs[:,numClass] .= model(inputs);
+    end;
+    # Aplicamos la funcion softmax
+    outputs = collect(softmax(outputs')');
+    # Convertimos a matriz de valores booleanos
+    outputs = classifyOutputs(outputs);
+    classComparison = (targets .== outputs);
+    correctClassifications = all(classComparison, dims=2);
+    return mean(correctClassifications);
+end;
+
+
+
+# A continuacion se muestra de forma practica como se podria usar este esquema de one vs all entrenando RRNNAA en este problema muticlase (flores iris)
+# IMPORTANTE: con RR.NN.AA. no es necesario utilizar una estrategia "one vs all" porque ya realiza multiclase
+
+# Parametros principales de la RNA y del proceso de entrenamiento
+topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
+learningRate = 0.01; # Tasa de aprendizaje
+numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
+validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion
+testRatio = 0.2; # Porcentaje de patrones que se usaran para test
+maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
+
+# Cargamos el dataset
+dataset = readdlm("datasets/iris.data",',');
+# Preparamos las entradas y las salidas deseadas
+inputs = convert(Array{Float64,2}, dataset[:,1:4]);
+targets = oneHotEncoding(dataset[:,5]);
+
+numClasses = size(targets,2);
+# Nos aseguramos que el numero de clases es mayor que 2, porque en caso contrario no tiene sentido hacer un "one vs all"
+@assert(numClasses>2);
+
+# Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
+normalizeMinMax!(inputs);
+
+# Creamos los indices de entrenamiento, validacion y test
+(trainingIndices, validationIndices, testIndices) = holdOut(size(inputs,1), validationRatio, testRatio);
+
+# Dividimos los datos
+trainingInputs    = inputs[trainingIndices,:];
+validationInputs  = inputs[validationIndices,:];
+testInputs        = inputs[testIndices,:];
+trainingTargets   = targets[trainingIndices,:];
+validationTargets = targets[validationIndices,:];
+testTargets       = targets[testIndices,:];
+
+# Reservamos memoria para las matrices de salidas de entrenamiento, validacion y test
+# En lugar de hacer 3 matrices, voy a hacerlo en una sola con todos los datos
+outputs = Array{Float64,2}(undef, size(inputs,1), numClasses);
+
+# Y creamos y entrenamos la RNA con los parametros dados para cada una de las clases
+for numClass = 1:numClasses
+
+    # A partir de ahora, no vamos a mostrar por pantalla el resultado de cada ciclo del entrenamiento de la RNA (no vamos a poner el showText=true)
+    local ann;
+    ann, = trainClassANN(topology,
+        trainingInputs,   trainingTargets[:,[numClass]],
+        validationInputs, validationTargets[:,[numClass]],
+        testInputs,       testTargets[:,[numClass]];
+        maxEpochs=numMaxEpochs, learningRate=learningRate, maxEpochsVal=maxEpochsVal);
+
+    # Aplicamos la RNA para calcular las salidas para esta clase concreta y las guardamos en la columna correspondiente de la matriz
+    outputs[:,numClass] = ann(inputs')';
+
+end;
+
+# A estas 3 matrices de resultados le pasamos la funcion softmax
+# Esto es opcional, y nos vale para poder interpretar la salida de cada modelo como la probabilidad de pertenencia de un patron a una clase concreta
+outputs = collect(softmax(outputs')');
+
+# Mostramos las matrices de confusion y las metricas
+println("Results in the training set:")
+printConfusionMatrix(outputs[trainingIndices,:], trainingTargets; weighted=true);
+println("Results in the validation set:")
+printConfusionMatrix(outputs[validationIndices,:], validationTargets; weighted=true);
+println("Results in the test set:")
+printConfusionMatrix(outputs[testIndices,:], testTargets; weighted=true);
+println("Results in the whole dataset:")
+printConfusionMatrix(outputs, targets; weighted=true);
