@@ -94,15 +94,26 @@ function primero_que_cumple(array::Array{Bool,1})
 end
 
 #Confusion +1 clase, de momento trabajo con patrones x columnas
-function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2})
+function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2},dataInRows::Bool=true)
     @assert(all(size(outputs).==size(targets)));
     #Matriz de confusión: filas(reales) columnas(predicciones)
     #comprobar si realmente es de 1d
-    matriz=convert(Array{Int},zeros(size(outputs,1),size(outputs,1)))
-    for i in 1:size(outputs,1)
+
+    n_patrones= dataInRows ? size(outputs,1) : size(outputs,2)
+    n_clases= dataInRows ? size(outputs,2) : size(outputs,1)
+    matriz=convert(Array{Int},zeros(n_clases,n_clases))
+    for i in 1:n_patrones
+        println(i)
         #buscar alguna func del palo de dame el indice del elemento que sea true
-        real=primero_que_cumple(targets[:,1])
-        prediccion=primero_que_cumple(targets[:,1])
+        if (dataInRows)
+
+            real=primero_que_cumple(targets[i,:])
+            prediccion=primero_que_cumple(targets[i,:])
+        else
+
+            real=primero_que_cumple(targets[:,i])
+            prediccion=primero_que_cumple(targets[:,i])
+        end
         matriz[real,prediccion]=matriz[real,prediccion]+1
     end
     return matriz
