@@ -110,15 +110,14 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2},dataInRo
     else
         matriz=convert(Array{Int},zeros(n_clases,n_clases))
         for i in 1:n_patrones
-            println(i)
             #buscar alguna func del palo de dame el indice del elemento que sea true
             if (dataInRows)
     
-                real=primero_que_cumple(targets[i,:])
+                real=primero_que_cumple(outputs[i,:])
                 prediccion=primero_que_cumple(targets[i,:])
             else
     
-                real=primero_que_cumple(targets[:,i])
+                real=primero_que_cumple(outputs[:,i])
                 prediccion=primero_que_cumple(targets[:,i])
             end
             matriz[real,prediccion]=matriz[real,prediccion]+1
@@ -126,3 +125,30 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2},dataInRo
         return matriz
     end
 end
+
+#Esto sería interesante meterlo en otro lado
+float_outputs_to_bool(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
+function float_outputs_to_bool(outputs::Array{Float64,2},dataInRows::Bool,threshold::Float64=0.5)
+    if (dataInRows)
+        # Cada patron esta en cada fila
+        if (size(targets,2)==1)
+            return float_outputs_to_bool(outputs[:,1],threshold);
+        else
+            vmax = maximum(outputs, dims=2);
+            return Array{Bool,2}(outputs .== vmax);
+        end;
+    else
+        # Cada patron esta en cada columna
+        if (size(targets,1)==1)
+            return float_outputs_to_bool(outputs[1,:],threshold);
+        else
+            vmax = maximum(outputs, dims=1)
+            return Array{Bool,2}(outputs .== vmax)
+        end;
+    end;
+end;
+
+confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
+#Pasamos de Float32 a Float64
+confusionMatrix(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Float64.(outputs), targets; threshold=threshold);
+confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = confusionMatrix(Float64.(outputs), targets; dataInRows=dataInRows);

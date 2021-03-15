@@ -42,4 +42,11 @@ validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, 
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
                                             learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
 
-print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies)                                           
+print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies) 
+
+#Resultados finales sobre todos los patrones:
+accuracy(Array{Float64,2}(ann(inputs')'),targets)
+confusionMatrix(float_outputs_to_bool(Array{Float64,2}(ann(inputs')'),true),targets,true)  
+
+#error: hay 4 patrones que estan fallando y no los pilla la matriz
+count(all((float_outputs_to_bool(Array{Float64,2}(ann(inputs')'),true).==targets),dims=2))
