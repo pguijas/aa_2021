@@ -70,7 +70,7 @@ function trainClassANN(topology::Array{Int64,1}, trainingInputs::Array{Float64,2
     # Creamos la RNA
     ann = buildClassANN(size(trainingInputs,2), topology, size(trainingTargets,2));
     # Definimos la funcion de loss
-    loss(x,y) = (size(y,1) == 1) ? binarycrossentropy(ann(x),y) : crossentropy(ann(x),y);
+    loss(x,y) = (size(y,1) == 1) ? Losses.binarycrossentropy(ann(x),y) : crossentropy(ann(x),y);
     # Creamos los vectores con los valores de loss y de precision en cada ciclo
     trainingLosses = Float64[];
     trainingAccuracies = Float64[];

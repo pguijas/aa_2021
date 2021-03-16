@@ -69,4 +69,10 @@ print_train_results(trainingLosses, validationLosses, testLosses, trainingAccura
 
 #Resultados finales sobre todos los patrones:
 accuracy(Array{Float64,2}(ann(inputs')'),targets)
-confusionMatrix(float_outputs_to_bool(Array{Float64,2}(ann(inputs')'),true),targets,true)  
+
+outputs=((ann(inputs')').>0.5)
+outputs=convert(Array{Bool,2},outputs)
+
+confusionMatrix(outputs,targets,true)  
+
+

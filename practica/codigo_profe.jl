@@ -38,7 +38,7 @@ oneHotEncoding(feature::Array{Bool,1}) = feature;
 # Ejemplo de uso de estas funciones:
 
 # Cargamos el dataset
-dataset = readdlm("datasets/iris.data",',');
+dataset = readdlm("iris.data",',');
 
 # Preparamos las entradas
 inputs = dataset[:,1:4];
@@ -294,7 +294,7 @@ learningRate = 0.01; # Tasa de aprendizaje
 numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 
 # Cargamos el dataset
-dataset = readdlm("datasets/iris.data",',');
+dataset = readdlm("iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -537,7 +537,7 @@ numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 
 # Cargamos el dataset
-dataset = readdlm("datasets/iris.data",',');
+dataset = readdlm("iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -578,7 +578,7 @@ testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 # Cargamos el dataset
-dataset = readdlm("datasets/iris.data",',');
+dataset = readdlm("iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -662,16 +662,21 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
     else
         # Nos aseguramos de que en cada fila haya uno y sólo un valor a true
         @assert(all(sum(outputs, dims=2).==1));
-        # Reservamos memoria para las metricas de cada clase
-        recall      = Array{Float64,1}(undef, numClasses);
-        specificity = Array{Float64,1}(undef, numClasses);
-        precision   = Array{Float64,1}(undef, numClasses);
-        NPV         = Array{Float64,1}(undef, numClasses);
-        F1          = Array{Float64,1}(undef, numClasses);
+        # Reservamos memoria para las metricas de cada clase, inicializandolas a 0 porque algunas posiblemente no se calculen
+        recall      = zeros(numClasses);
+        specificity = zeros(numClasses);
+        precision   = zeros(numClasses);
+        NPV         = zeros(numClasses);
+        F1          = zeros(numClasses);
         # Reservamos memoria para la matriz de confusion
         confMatrix  = Array{Int64,2}(undef, numClasses, numClasses);
-        # Calculamos estos valores para cada clase
-        for numClass in 1:numClasses
+        # Calculamos el numero de patrones de cada clase
+        numInstancesFromEachClass = vec(sum(targets, dims=1));
+        # Calculamos las metricas para cada clase, esto se haria con un bucle similar a "for numClass in 1:numClasses" que itere por todas las clases
+        #  Sin embargo, solo hacemos este calculo para las clases que tengan algun patron
+        #  Puede ocurrir que alguna clase no tenga patrones como consecuencia de haber dividido de forma aleatoria el conjunto de patrones entrenamiento/test
+        #  En aquellas clases en las que no haya patrones, los valores de las metricas seran 0 (los vectores ya estan asignados), y no se tendran en cuenta a la hora de unir estas metricas
+        for numClass in findall(numInstancesFromEachClass.>0)
             # Calculamos las metricas de cada problema binario correspondiente a cada clase y las almacenamos en los vectores correspondientes
             (_, _, recall[numClass], specificity[numClass], precision[numClass], NPV[numClass], F1[numClass], _) = confusionMatrix(outputs[:,numClass], targets[:,numClass]);
         end;
@@ -686,8 +691,7 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
 
         # Aplicamos las forma de combinar las metricas macro o weighted
         if weighted
-            # Calculamos el numero de patrones de cada clase y los valores de ponderacion para hacer el promedio
-            numInstancesFromEachClass = vec(sum(targets, dims=1));
+            # Calculamos los valores de ponderacion para hacer el promedio
             weights = numInstancesFromEachClass./sum(numInstancesFromEachClass);
             recall      = sum(weights.*recall);
             specificity = sum(weights.*specificity);
@@ -695,11 +699,14 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
             NPV         = sum(weights.*NPV);
             F1          = sum(weights.*F1);
         else
-            recall      = mean(recall);
-            specificity = mean(specificity);
-            precision   = mean(precision);
-            NPV         = mean(NPV);
-            F1          = mean(F1);
+            # No realizo la media tal cual con la funcion mean, porque puede haber clases sin instancias
+            #  En su lugar, realizo la media solamente de las clases que tengan instancias
+            numClassesWithInstances = sum(numInstancesFromEachClass.>0);
+            recall      = sum(recall)/numClassesWithInstances;
+            specificity = sum(specificity)/numClassesWithInstances;
+            precision   = sum(precision)/numClassesWithInstances;
+            NPV         = sum(NPV)/numClassesWithInstances;
+            F1          = sum(F1)/numClassesWithInstances;
         end;
         # Precision y tasa de error las calculamos con las funciones definidas previamente
         acc = accuracy(outputs, targets; dataInRows=true);
@@ -708,6 +715,7 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
         return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
     end;
 end;
+
 
 function confusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
     # Comprobamos que todas las clases de salida esten dentro de las clases de las salidas deseadas
@@ -814,7 +822,7 @@ testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 # Cargamos el dataset
-dataset = readdlm("datasets/iris.data",',');
+dataset = readdlm("iris.data",',');
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:4]);
 targets = oneHotEncoding(dataset[:,5]);
@@ -870,3 +878,127 @@ println("Results in the test set:")
 printConfusionMatrix(outputs[testIndices,:], testTargets; weighted=true);
 println("Results in the whole dataset:")
 printConfusionMatrix(outputs, targets; weighted=true);
+
+
+
+
+
+
+
+
+
+# ----------------------------------------------------------------------------------------------
+# ------------------------------------- Practica 5 ---------------------------------------------
+# ----------------------------------------------------------------------------------------------
+
+using Random
+using Random:seed!
+
+function crossvalidation(N::Int64, k::Int64)
+    indices = repeat(1:k, Int64(ceil(N/k)));
+    indices = indices[1:N];
+    shuffle!(indices);
+    return indices;
+end;
+
+
+# -------------------------------------------------------------------------
+# Código de prueba:
+
+# Fijamos la semilla aleatoria para poder repetir los experimentos
+seed!(1);
+
+# Parametros principales de la RNA y del proceso de entrenamiento
+topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
+learningRate = 0.01; # Tasa de aprendizaje
+numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
+numFolds = 10;
+validationRatio = 0; # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
+maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
+numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA para cada fold por el hecho de ser no determinístico el entrenamiento
+
+# Cargamos el dataset
+dataset = readdlm("iris.data",',');
+# Preparamos las entradas y las salidas deseadas
+inputs = convert(Array{Float64,2}, dataset[:,1:4]);
+targets = oneHotEncoding(dataset[:,5]);
+
+numClasses = size(targets,2);
+# Nos aseguramos que el numero de clases es mayor que 2, porque en caso contrario no tiene sentido hacer un "one vs all"
+@assert(numClasses>2);
+
+# Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
+normalizeMinMax!(inputs);
+
+# Creamos los indices de crossvalidation
+crossValidationIndices = crossvalidation(size(inputs,1), numFolds);
+
+# Creamos los vectores para las metricas que se vayan a usar
+# En este caso, solo voy a usar precision y F1, en otro problema podrían ser distintas
+testAccuracies = Array{Float64,1}(undef, numFolds);
+testF1         = Array{Float64,1}(undef, numFolds);
+
+# Para cada fold, entrenamos
+for numFold in 1:numFolds
+
+    # Dividimos los datos en entrenamiento y test
+    local trainingInputs, testInputs, trainingTargets, testTargets;
+    trainingInputs    = inputs[crossValidationIndices.!=numFold,:];
+    testInputs        = inputs[crossValidationIndices.==numFold,:];
+    trainingTargets   = targets[crossValidationIndices.!=numFold,:];
+    testTargets       = targets[crossValidationIndices.==numFold,:];
+
+    # En el caso de entrenar una RNA, este proceso es no determinístico, por lo que es necesario repetirlo para cada fold
+    # Para ello, se crean vectores adicionales para almacenar las metricas para cada entrenamiento
+    testAccuraciesEachRepetition = Array{Float64,1}(undef, numRepetitionsAANTraining);
+    testF1EachRepetition         = Array{Float64,1}(undef, numRepetitionsAANTraining);
+
+    for numTraining in 1:numRepetitionsAANTraining
+
+        if validationRatio>0
+
+            # Para el caso de entrenar una RNA con conjunto de validacion, hacemos una división adicional:
+            #  dividimos el conjunto de entrenamiento en entrenamiento+validacion
+            #  Para ello, hacemos un hold out
+            local trainingIndices, validationIndices;
+            (trainingIndices, validationIndices) = holdOut(size(trainingInputs,1), validationRatio*size(trainingInputs,1)/size(inputs,1));
+            # Con estos indices, se pueden crear los vectores finales que vamos a usar para entrenar una RNA
+
+            # Entrenamos la RNA
+            local ann;
+            ann, = trainClassANN(topology,
+                trainingInputs[trainingIndices,:],   trainingTargets[trainingIndices,:],
+                trainingInputs[validationIndices,:], trainingTargets[validationIndices,:],
+                testInputs,                          testTargets;
+                maxEpochs=numMaxEpochs, learningRate=learningRate, maxEpochsVal=maxEpochsVal);
+
+        else
+
+            # Si no se desea usar conjunto de validacion, se entrena unicamente con conjuntos de entrenamiento y test
+            local ann;
+            ann, = trainClassANN(topology,
+                trainingInputs, trainingTargets,
+                testInputs,     testTargets;
+                maxEpochs=numMaxEpochs, learningRate=learningRate);
+
+        end;
+
+        # Calculamos las metricas correspondientes con la funcion desarrollada en la practica anterior
+        (acc, _, _, _, _, _, F1, _) = confusionMatrix(collect(ann(testInputs')'), testTargets);
+
+        # Almacenamos las metricas de este entrenamiento
+        testAccuraciesEachRepetition[numTraining] = acc;
+        testF1EachRepetition[numTraining]         = F1;
+
+    end;
+
+    # Almacenamos las 2 metricas que usamos en este problema
+    testAccuracies[numFold] = mean(testAccuraciesEachRepetition);
+    testF1[numFold]         = mean(testF1EachRepetition);
+
+    println("Results in test in fold ", numFold, "/", numFolds, ": accuracy: ", 100*testAccuracies[numFold], " %, F1: ", 100*testF1[numFold], " %");
+
+end;
+
+println("Average test accuracy on a ", numFolds, "-fold crossvalidation: ", 100*mean(testAccuracies), ", with a standard deviation of ", 100*std(testAccuracies));
+println("Average test F1 on a ", numFolds, "-fold crossvalidation: ", 100*mean(testF1), ", with a standard deviation of ", 100*std(testF1));
