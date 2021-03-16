@@ -14,7 +14,7 @@ learningRate = 0.01; # Tasa de aprendizaje
 numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion
 testRatio = 0.2; # Porcentaje de patrones que se usaran para test
-maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
+maxEpochsVal = 15; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 #Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
@@ -68,7 +68,7 @@ validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, 
 print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies) 
 
 #Resultados finales sobre todos los patrones:
-accuracy(Array{Float64,2}(ann(inputs')'),targets)
+println(accuracy(Array{Float64,2}(ann(inputs')'),targets))
 
 outputs=((ann(inputs')').>0.5)
 outputs=convert(Array{Bool,2},outputs)
