@@ -30,7 +30,6 @@ function loadFolderImages(folderName::String)
         if isImageExtension(fileName)
             # Leemos la imagen
             image = load(string(folderName, "/", fileName));
-            @show(typeof(image))
             # Comprobar que el archivo cargado sea una imagen en color
             @assert(isa(image, Array{RGBA{Normed{UInt8,8}},2}) || isa(image, Array{RGB{Normed{UInt8,8}},2}))
             # Añadimos la foto al array de imagenes
@@ -106,4 +105,4 @@ end
 
 # =============================================================================
 # Nuestro codigo usara:
-(inputs, targets) = getInputs("../");
+(inputs, targets) = getInputs("../aa_2021");
