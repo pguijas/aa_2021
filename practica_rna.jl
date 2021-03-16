@@ -25,8 +25,7 @@ end
 # Cargamos el dataset
 dataset = readdlm(dataset_name,',');
 println("Tamaños en la carga:")
-println(size(inputs))
-println(size(targets))
+println(size(dataset))
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:9]);
 targets = oneHotEncoding(dataset[:,10]);

@@ -4,7 +4,6 @@
 # =============================================================================
 
 using Plots;
-using PyPlot;
 
 function print_train_results(
     trainingLosses::Array{Float64,1},validationLosses::Array{Float64,1},testLosses::Array{Float64,1},

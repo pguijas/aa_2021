@@ -102,7 +102,3 @@ function getInputs(path)
 
     return (inputs,targets)
 end
-
-# =============================================================================
-# Nuestro codigo usara:
-(inputs, targets) = getInputs("../aa_2021");
