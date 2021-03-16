@@ -27,10 +27,16 @@ function loadFolderImages(folderName::String)
 
     # Para cada fichero que detecte en la carpeta dada
     for fileName in readdir(folderName)
+        println(fileName)
         if isImageExtension(fileName)
             # Leemos la imagen
             image = load(string(folderName, "/", fileName));
             # Comprobar que el archivo cargado sea una imagen en color
+            @show (typeof(image))
+            #Rgbx Vete a tomar por culo
+            if (typeof(image)==Array{RGBX{Normed{UInt8,8}},2})
+                image=convert(Array{RGB{Normed{UInt8,8}},2},image)
+            end
             @assert(isa(image, Array{RGBA{Normed{UInt8,8}},2}) || isa(image, Array{RGB{Normed{UInt8,8}},2}))
             # Añadimos la foto al array de imagenes
             push!(images, image);
@@ -85,6 +91,7 @@ function getInputs(path)
         trues(size(positiveDataset,1));
         falses(size(negativeDataset,1))
     ];
+    targets=convert(Array{Bool, 1},targets)
 
     # Generamos la primera parte de la matriz de inputs con los elementos
     # que son positivos
@@ -99,10 +106,27 @@ function getInputs(path)
         foto = negativeDataset[rows-i + 1];
         inputs[i,:] = getAttributesFromImage(foto);
     end;
-
+    @show (typeof(targets))
     return (inputs,targets)
+end
+
+function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Array{Bool, 1})
+    f = open(file_name, "w")
+    for line in 1:size(inputs,1)
+        string_line=""
+        for item in inputs[line,:]
+            string_line=string(string_line,item,",")
+        end
+        if (targets[line])
+            string_line=string(string_line,"1")
+        else
+            string_line=string(string_line,"0")
+        end
+        print(f,string_line) 
+        println(f,"")
+    end
 end
 
 # =============================================================================
 # Nuestro codigo usara:
-(inputs, targets) = getInputs("../aa_2021");
+(inputs, targets) = getInputs("datasets");
