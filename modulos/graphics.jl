@@ -1,9 +1,9 @@
 # =============================================================================
 # graphics.jl -> Funciones útiles para visualizar gráficamente los resultados de una RNA:
-#   -
+#   - 
 # =============================================================================
 
-using Plots;
+using Plots
 
 function print_train_results(
     trainingLosses::Array{Float64,1},validationLosses::Array{Float64,1},testLosses::Array{Float64,1},

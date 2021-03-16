@@ -4,6 +4,10 @@ include("modulos/datasets.jl")
 include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
+#RECORDAR:
+#   Para revisar que esté todo bien mostrar gráficos del codigo del 
+#   profe y el nuestro, conjunto test tintinea un poco
+
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
