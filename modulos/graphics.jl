@@ -15,5 +15,5 @@ function print_train_results(
     accuracy=plot(x,[trainingAccuracies validationAccuracies testAccuracies],title = "Accuracies",label = ["Training" "Validation" "Test"],)
     xlabel!("Epoch")
     ylabel!("% Accuracies")
-    plot(losses,accuracy)
+    display(plot(losses,accuracy))
 end

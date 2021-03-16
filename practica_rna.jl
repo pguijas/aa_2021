@@ -28,11 +28,22 @@ end
 
 # Cargamos el dataset
 dataset = readdlm(dataset_name,',');
-println("Tamaños en la carga:")
-println(size(dataset))
+
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:9]);
-targets = oneHotEncoding(dataset[:,10]);
+targets = oneHotEncoding(convert(Array{Any,1},dataset[:,10]));
+
+println()
+print("Input: ")
+print(size(inputs))
+print(", ")
+print(typeof(inputs))
+
+println()
+print("targets: ")
+print(size(targets))
+print(", ")
+print(typeof(targets))
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 normalizeMinMax!(inputs);
