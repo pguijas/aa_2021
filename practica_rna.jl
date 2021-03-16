@@ -5,8 +5,19 @@ include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
 #RECORDAR:
-#   Para revisar que esté todo bien mostrar gráficos del codigo del 
+#   Para revisar que esté todo bien mostrar gráficos del codigo del
 #   profe y el nuestro, conjunto test tintinea un poco
+
+#===============================================================================
+DUDAS
+    - Héctor: ¿Necesitamos medir la varianza? La varianza solo es la desviación
+        típica elevada al cuadrado, creo que estamos midiendo lo mismo. La
+        media mide la cantidad de color que tiene una imagen, y la desviacion
+        típica la dispersión del color, la varianza sigue midiendo la dispersión
+        del color, solo que al cuadrado, le estamos dando más importancia a la
+        desviación típica que a la media y la red va a aprender que es + importante
+        la dispersión que la media, cuando deberían de tener la misma importancia.
+===============================================================================#
 
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
@@ -65,7 +76,7 @@ validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, 
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
                                             learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
 
-print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies) 
+print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies)
 
 #Resultados finales sobre todos los patrones:
 println(accuracy(Array{Float64,2}(ann(inputs')'),targets))
@@ -73,6 +84,4 @@ println(accuracy(Array{Float64,2}(ann(inputs')'),targets))
 outputs=((ann(inputs')').>0.5)
 outputs=convert(Array{Bool,2},outputs)
 
-confusionMatrix(outputs,targets,true)  
-
-
+confusionMatrix(outputs,targets,true)

@@ -4,7 +4,7 @@
 #   - trainClassANN
 # =============================================================================
 
-using Flux: Chain, Dense, σ, softmax, crossentropy, params, ADAM, train!, binarycrossentropy
+using Flux: Chain, Dense, σ, softmax, Losses, params, ADAM, train!;
 
 #
 # Función que crea una rna según la topología que se le indica.
