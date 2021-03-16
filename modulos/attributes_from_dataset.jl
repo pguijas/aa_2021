@@ -32,7 +32,6 @@ function loadFolderImages(folderName::String)
             # Leemos la imagen
             image = load(string(folderName, "/", fileName));
             # Comprobar que el archivo cargado sea una imagen en color
-            @show (typeof(image))
             #Rgbx Vete a tomar por culo
             if (typeof(image)==Array{RGBX{Normed{UInt8,8}},2})
                 image=convert(Array{RGB{Normed{UInt8,8}},2},image)
@@ -126,7 +125,3 @@ function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Arra
         println(f,"")
     end
 end
-
-# =============================================================================
-# Nuestro codigo usara:
-(inputs, targets) = getInputs("datasets");
