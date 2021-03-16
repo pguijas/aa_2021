@@ -20,13 +20,13 @@ if (!isfile(dataset_name))
     println(size(inputs))
     println(size(targets))
     write_dataset(dataset_name,inputs,targets)
-    println("Tamaños en la carga:")
-    println(size(inputs))
-    println(size(targets))
 end
 
 # Cargamos el dataset
 dataset = readdlm(dataset_name,',');
+println("Tamaños en la carga:")
+println(size(inputs))
+println(size(targets))
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:9]);
 targets = oneHotEncoding(dataset[:,10]);
