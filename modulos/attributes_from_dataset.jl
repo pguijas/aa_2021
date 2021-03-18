@@ -73,12 +73,6 @@ end
 
 # =============================================================================
 
-
-function getAttributes!(index, division)
-    global positiveDataset, negativeDataset;
-    inputs[i,:] = (index < division) ? getAttributesFromImage(positiveDataset[i]) : getAttributesFromImage(negativeDataset[i]);
-end;
-
 # Funcion que obtiene una matriz Nx9, donde N es el numero de elementos
 # (positivos + negativos) y 9 es el numero de columnas (varianza, media y
 # desviacion tipica) para cada canal RGB y un vector de targets
@@ -98,7 +92,6 @@ function getInputs(path)
 
     # Generamos la primera parte de la matriz de inputs con los elementos
     # que son positivos
-    #getAttributes!.([1:1:rows;],size(positiveDataset,1));
     for i in 1:size(positiveDataset,1)
         foto = positiveDataset[i];
         inputs[i,:] = getAttributesFromImage(foto);
