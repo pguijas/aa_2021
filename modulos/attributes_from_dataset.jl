@@ -60,20 +60,24 @@ end;
 # Funcion que obtiene la varianza, desviacion y media de los 3 canales RGB de
 # una imagen dada
 function getAttributesFromImage(foto)
-    temp_array = [];
+    inputs = [];
     for canal in 1:3
-        std_image = std(foto[:,:,canal]);
         mean_image = mean(foto[:,:,canal]);
-        var_image = var(foto[:,:,canal]);
+        std_image = std(foto[:,:,canal]);
 
-        push!(temp_array, std_image)
-        push!(temp_array, mean_image)
-        push!(temp_array, var_image)
+        push!(inputs, mean_image)
+        push!(inputs, std_image)
     end;
-    return temp_array;
+    return inputs;
 end
 
 # =============================================================================
+
+
+function getAttributes!(index, division)
+    global positiveDataset, negativeDataset;
+    inputs[i,:] = (index < division) ? getAttributesFromImage(positiveDataset[i]) : getAttributesFromImage(negativeDataset[i]);
+end;
 
 # Funcion que obtiene una matriz Nx9, donde N es el numero de elementos
 # (positivos + negativos) y 9 es el numero de columnas (varianza, media y
@@ -83,7 +87,7 @@ function getInputs(path)
     (positiveDataset, negativeDataset) = loadDataset(path);
     # Generamos la matriz de inputs y targets
     rows = size(positiveDataset,1) + size(negativeDataset,1);
-    cols = 9;
+    cols = 6;
 
     inputs = Array{Float64, 2}(undef, rows, cols);
     targets = [
@@ -94,6 +98,7 @@ function getInputs(path)
 
     # Generamos la primera parte de la matriz de inputs con los elementos
     # que son positivos
+    #getAttributes!.([1:1:rows;],size(positiveDataset,1));
     for i in 1:size(positiveDataset,1)
         foto = positiveDataset[i];
         inputs[i,:] = getAttributesFromImage(foto);
@@ -105,7 +110,6 @@ function getInputs(path)
         foto = negativeDataset[rows-i + 1];
         inputs[i,:] = getAttributesFromImage(foto);
     end;
-    @show (typeof(targets))
     return (inputs,targets)
 end
 
@@ -121,7 +125,7 @@ function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Arra
         else
             string_line=string(string_line,"0")
         end
-        print(f,string_line) 
+        print(f,string_line)
         println(f,"")
     end
 end

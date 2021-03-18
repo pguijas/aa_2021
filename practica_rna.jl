@@ -37,12 +37,15 @@ if (!isfile(dataset_name))
     write_dataset(dataset_name,inputs,targets)
 end
 
+# Héctor: A mi me da bastantes errores la función de escribir el dataset,
+#   quizás podríamos mejorarla.
+
 # Cargamos el dataset
 dataset = readdlm(dataset_name,',');
 
 # Preparamos las entradas y las salidas deseadas
-inputs = convert(Array{Float64,2}, dataset[:,1:9]);
-targets = oneHotEncoding(convert(Array{Any,1},dataset[:,10]));
+inputs = convert(Array{Float64,2}, dataset[:,1:6]);
+targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));
 
 println()
 print("Input: ")
@@ -81,6 +84,7 @@ print_train_results(trainingLosses, validationLosses, testLosses, trainingAccura
 #Resultados finales sobre todos los patrones:
 println(accuracy(Array{Float64,2}(ann(inputs')'),targets))
 
+# esto podríamos meterlo dentro de la matriz de confusión
 outputs=((ann(inputs')').>0.5)
 outputs=convert(Array{Bool,2},outputs)
 
