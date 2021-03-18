@@ -90,7 +90,21 @@ print_train_results(trainingLosses, validationLosses, testLosses, trainingAccura
 println(accuracy(Array{Float64,2}(ann(inputs')'),targets));
 
 # esto podríamos meterlo dentro de la matriz de confusión
-outputs=((ann(inputs')').>0.5)
-outputs=convert(Array{Bool,2},outputs)
+outputs=((ann(inputs')').>0.5);
+outputs=convert(Array{Bool,2},outputs);
+
 
 confusionMatrix(outputs,targets,true);
+
+#println("Resultados en el conjunto de entrenamiento:")
+#trainingOutputs = (collect(ann(trainingInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},trainingOutputs), trainingTargets; weighted=true);
+#println("Resultados en el conjunto de validación:")
+#validationOutputs = (collect(ann(validationInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},validationOutputs), validationTargets; weighted=true);
+#println("Resultados en el conjunto de test:")
+#testOutputs = (collect(ann(testInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},testOutputs), testTargets; weighted=true);
+#println("Resultados globales:")
+#outputs = (collect(ann(inputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},outputs), targets; weighted=true);
