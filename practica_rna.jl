@@ -77,7 +77,7 @@ testTargets       = targets[testIndices,:];
 (ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
 validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
-                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
+                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true) |> gpu;
 
 print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies)
 
