@@ -4,6 +4,8 @@ include("modulos/datasets.jl")
 include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
+using Flux: gpu;
+
 #RECORDAR:
 #   Para revisar que esté todo bien mostrar gráficos del codigo del
 #   profe y el nuestro, conjunto test tintinea un poco
