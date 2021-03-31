@@ -4,6 +4,7 @@ include("modulos/datasets.jl")
 include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
+using CUDA;
 using Flux: gpu;
 
 #RECORDAR:
@@ -50,19 +51,19 @@ inputs = convert(Array{Float64,2}, dataset[:,1:6]);
 targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));
 
 println()
-print("Input: ")
+print("Inputs: ")
 print(size(inputs))
 print(", ")
 print(typeof(inputs))
 
 println()
-print("targets: ")
+print("Targets: ")
 print(size(targets))
 print(", ")
-print(typeof(targets))
+println(typeof(targets))
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
-normalizeMinMax!(inputs);
+#normalizeMinMax!(inputs);
 
 # Creamos los indices de entrenamiento, validacion y test
 (trainingIndices, validationIndices, testIndices) = holdOut(size(inputs,1), validationRatio, testRatio);
@@ -75,19 +76,35 @@ trainingTargets   = targets[trainingIndices,:];
 validationTargets = targets[validationIndices,:];
 testTargets       = targets[testIndices,:];
 
+println("Empezando el entrenamiento.")
+println()
 # Y creamos y entrenamos la RNA con los parametros dados
 (ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
 validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
                                             learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true) |> gpu;
 
-print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies)
+print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
 
 #Resultados finales sobre todos los patrones:
-println(accuracy(Array{Float64,2}(ann(inputs')'),targets))
+println(accuracy(Array{Float64,2}(ann(inputs')'),targets));
 
 # esto podríamos meterlo dentro de la matriz de confusión
-outputs=((ann(inputs')').>0.5)
-outputs=convert(Array{Bool,2},outputs)
+outputs=((ann(inputs')').>0.5);
+outputs=convert(Array{Bool,2},outputs);
 
-confusionMatrix(outputs,targets,true)
+
+confusionMatrix(outputs,targets,true);
+
+#println("Resultados en el conjunto de entrenamiento:")
+#trainingOutputs = (collect(ann(trainingInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},trainingOutputs), trainingTargets; weighted=true);
+#println("Resultados en el conjunto de validación:")
+#validationOutputs = (collect(ann(validationInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},validationOutputs), validationTargets; weighted=true);
+#println("Resultados en el conjunto de test:")
+#testOutputs = (collect(ann(testInputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},testOutputs), testTargets; weighted=true);
+#println("Resultados globales:")
+#outputs = (collect(ann(inputs')')).>0.5;
+#printConfusionMatrix2(convert(Array{Bool,2},outputs), targets; weighted=true);
