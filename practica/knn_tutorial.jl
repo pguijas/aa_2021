@@ -9,7 +9,7 @@
 using FileIO;
 using DelimitedFiles;
 using ScikitLearn;
-@sk_import tree: DecisionTreeClassifier
+@sk_import neighbors: KNeighborsClassifier
 
 include("../modulos/datasets.jl")
 
@@ -26,8 +26,11 @@ trainingTargets = targets[trainingIndices,:];
 testTargets = targets[testIndices,:];
 
 
-model = DecisionTreeClassifier(max_depth=4, random_state=1);
+model = KNeighborsClassifier(3);
 
 model = fit!(model, trainingInputs, trainingTargets);
 
 @show(keys(model))
+@show(model.n_neighbors)
+@show(model.metric)
+@show(model.weights)
