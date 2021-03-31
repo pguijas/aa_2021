@@ -9,9 +9,7 @@
 using FileIO;
 using DelimitedFiles;
 using ScikitLearn;
-@sk_import svm: SVC
-using Random
-using Random:seed!
+@sk_import tree: DecisionTreeClassifier
 
 include("../modulos/datasets.jl")
 
@@ -33,14 +31,10 @@ testTargets = targets[testIndices,:];
 #   -kernel: función de kernel que usará la svm ‘linear’, ‘poly’, ‘rbf’,
 #       ‘sigmoid’, ‘precomputed’ o una función que definamos nosotros.
 #   -degree:
-model = SVC(kernel="rbf", degree=3, gamma=2, C=1);
+model = DecisionTreeClassifier(max_depth=4, random_state=1);
 
 model = fit!(model, trainingInputs, trainingTargets);
 
 distances = decision_function(model, inputs);
 
-@show(distances)
 @show(keys(model))
-@show(model.C)
-@show(model.support_vectors_)
-@show(model.support_)
