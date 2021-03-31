@@ -8,6 +8,9 @@ include("modulos/rna.jl")
 #   Para revisar que esté todo bien mostrar gráficos del codigo del 
 #   profe y el nuestro, conjunto test tintinea un poco
 
+#Dudas:
+#   QUE POOLLAS ES EL weighted¿?¿?¿?¿?¿?
+
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
@@ -46,4 +49,5 @@ print_train_results(trainingLosses, validationLosses, testLosses, trainingAccura
 
 #Resultados finales sobre todos los patrones:
 accuracy(Array{Float64,2}(ann(inputs')'),targets)
-confusionMatrix(float_outputs_to_bool(Array{Float64,2}(ann(inputs')'),true),targets,true)  
+#confusionMatrix(float_outputs_to_bool(Array{Float64,2}(ann(inputs')'),true),targets,true)  
+#printConfusionMatrix((ann(inputs')'), targets)

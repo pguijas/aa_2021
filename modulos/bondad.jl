@@ -1,7 +1,42 @@
 # =============================================================================
 # bondad.jl -> Funciones útiles calcular la bondad de un sistema:
 #   - accuracy (precisión)
-#   -> falta p4
+#   - confusionMatrix
+#   - printConfusionMatrix
+# =============================================================================
+
+# PEDRO ACUERDATE DE CAMBIAR ACCURACY EN FLOAT64 Y USAR classifyOutputs 
+
+# =============================================================================
+# classifyOutputs -> ESTO DEBERIAMOS MOVERLO DE SITIO -> POR MI LO MOVIA A DATASETS // RNA Y QUE ESTE MODULO TRABAJASE CON BOOLS DIRECTAMENTE
+# =============================================================================
+
+#clasifyoutputs no contempla que pueda estar definido como matriz pero sea
+
+classifyOutputs(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
+function classifyOutputs(outputs::Array{Float64,2},dataInRows::Bool=true,threshold::Float64=0.5)
+    if (dataInRows)
+        # Cada patron esta en cada fila
+        if (size(targets,2)==1)
+            return classifyOutputs(outputs[:,1],threshold);
+        else
+            vmax = maximum(outputs, dims=2);
+            return Array{Bool,2}(outputs .== vmax);
+        end;
+    else
+        # Cada patron esta en cada columna
+        if (size(targets,1)==1)
+            return classifyOutputs(outputs[1,:],threshold);
+        else
+            vmax = maximum(outputs, dims=1)
+            return Array{Bool,2}(outputs .== vmax)
+        end;
+    end;
+end;
+
+
+# =============================================================================
+# Accuracy
 # =============================================================================
 
 #Precisión bool 1d
@@ -64,113 +99,11 @@ accuracy(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0
 accuracy(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = accuracy(Float64.(outputs), targets; dataInRows=dataInRows);
 
 
-#Confusion 1 clase
+# =============================================================================
+# confusionMatrix
+# =============================================================================
+
 function confusionMatrix(outputs::Array{Bool,1}, targets::Array{Bool,1})
-    @assert(all(size(outputs).==size(targets)));
-    #Matriz de confusión: filas(reales) columnas(predicciones)
-    matriz=convert(Array{Int},zeros(2,2))
-    for i in 1:size(outputs,1)
-        if (targets[i])
-            real=2
-        else
-            real=1
-        end
-        if (outputs[i])
-            prediccion=2
-        else
-            prediccion=1
-        end
-        matriz[real,prediccion]=matriz[real,prediccion]+1
-    end
-    return matriz
-end
-
-function primero_que_cumple(array::Array{Bool,1})
-    for i in 1:size(array,1)
-        if (array[i])
-            return i
-        end
-    end
-end
-
-#Confusion +1 clase, de momento trabajo con patrones x columnas
-function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2},dataInRows::Bool=true)
-    @assert(all(size(outputs).==size(targets)));
-    #Matriz de confusión: filas(reales) columnas(predicciones)
-    n_patrones= dataInRows ? size(outputs,1) : size(outputs,2)
-    n_clases= dataInRows ? size(outputs,2) : size(outputs,1)
-    #comprobar si realmente es de 1d
-    if (n_clases==1)
-        if (dataInRows)
-            return confusionMatrix(outputs[:,1],targets[:,1])
-        else
-            return confusionMatrix(outputs[1,:],targets[1,:])
-        end
-
-    else
-        matriz=convert(Array{Int},zeros(n_clases,n_clases))
-        for i in 1:n_patrones
-            #buscar alguna func del palo de dame el indice del elemento que sea true
-            if (dataInRows)
-
-                real=primero_que_cumple(outputs[i,:])
-                prediccion=primero_que_cumple(targets[i,:])
-            else
-
-                real=primero_que_cumple(outputs[:,i])
-                prediccion=primero_que_cumple(targets[:,i])
-            end
-            matriz[real,prediccion]=matriz[real,prediccion]+1
-        end
-        return matriz
-    end
-end
-
-#Esto sería interesante meterlo en otro lado
-float_outputs_to_bool(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
-function float_outputs_to_bool(outputs::Array{Float64,2},dataInRows::Bool,threshold::Float64=0.5)
-    if (dataInRows)
-        # Cada patron esta en cada fila
-        if (size(targets,2)==1)
-            return float_outputs_to_bool(outputs[:,1],threshold);
-        else
-            vmax = maximum(outputs, dims=2);
-            return Array{Bool,2}(outputs .== vmax);
-        end;
-    else
-        # Cada patron esta en cada columna
-        if (size(targets,1)==1)
-            return float_outputs_to_bool(outputs[1,:],threshold);
-        else
-            vmax = maximum(outputs, dims=1)
-            return Array{Bool,2}(outputs .== vmax)
-        end;
-    end;
-end;
-
-confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
-#Pasamos de Float32 a Float64
-confusionMatrix(outputs::Array{Float32,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Float64.(outputs), targets; threshold=threshold);
-confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=true)  = confusionMatrix2(2Float64.(outputs), targets; dataInRows=dataInRows);
-
-
-# codigo del profe
-
-# Funciones auxiliar que permite transformar una matriz de
-#  valores reales con las salidas del clasificador o clasificadores
-#  en una matriz de valores booleanos con la clase en la que sera clasificada
-function classifyOutputs(outputs::Array{Float64,2}; dataInRows::Bool=true)
-    # Miramos donde esta el valor mayor de cada instancia con la funcion findmax
-    (_,indicesMaxEachInstance) = findmax(outputs, dims= dataInRows ? 2 : 1);
-    # Creamos la matriz de valores booleanos con valores inicialmente a false y asignamos esos indices a true
-    outputsBoolean = Array{Bool,2}(falses(size(outputs)));
-    outputsBoolean[indicesMaxEachInstance] .= true;
-    # Comprobamos que efectivamente cada patron solo este clasificado en una clase
-    @assert(all(sum(outputsBoolean, dims=dataInRows ? 2 : 1).==1));
-    return outputsBoolean;
-end;
-
-function confusionMatrix2(outputs::Array{Bool,1}, targets::Array{Bool,1})
     @assert(length(outputs)==length(targets));
     @assert(length(outputs)==length(targets));
     # Para calcular la precision y la tasa de error, se puede llamar a las funciones definidas en la practica 2
@@ -200,16 +133,13 @@ function confusionMatrix2(outputs::Array{Bool,1}, targets::Array{Bool,1})
     return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix)
 end;
 
-confusionMatrix2(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix2(Array{Bool,1}(outputs.>=threshold), targets);
-
-
-function confusionMatrix2(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
+function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
     @assert(size(outputs)==size(targets));
     numClasses = size(targets,2);
     # Nos aseguramos de que no hay dos columnas
     @assert(numClasses!=2);
     if (numClasses==1)
-        return confusionMatrix2(outputs[:,1], targets[:,1]);
+        return confusionMatrix(outputs[:,1], targets[:,1]);
     else
         # Nos aseguramos de que en cada fila haya uno y sólo un valor a true
         @assert(all(sum(outputs, dims=2).==1));
@@ -229,7 +159,7 @@ function confusionMatrix2(outputs::Array{Bool,2}, targets::Array{Bool,2}; weight
         #  En aquellas clases en las que no haya patrones, los valores de las metricas seran 0 (los vectores ya estan asignados), y no se tendran en cuenta a la hora de unir estas metricas
         for numClass in findall(numInstancesFromEachClass.>0)
             # Calculamos las metricas de cada problema binario correspondiente a cada clase y las almacenamos en los vectores correspondientes
-            (_, _, recall[numClass], specificity[numClass], precision[numClass], NPV[numClass], F1[numClass], _) = confusionMatrix2(outputs[:,numClass], targets[:,numClass]);
+            (_, _, recall[numClass], specificity[numClass], precision[numClass], NPV[numClass], F1[numClass], _) = confusionMatrix(outputs[:,numClass], targets[:,numClass]);
         end;
 
         # Reservamos memoria para la matriz de confusion
@@ -267,25 +197,19 @@ function confusionMatrix2(outputs::Array{Bool,2}, targets::Array{Bool,2}; weight
     end;
 end;
 
+#Para la salida de la RNA en crudo
+confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
+confusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(classifyOutputs(outputs), targets; weighted=weighted);
+confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
 
-function confusionMatrix2(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
-    # Comprobamos que todas las clases de salida esten dentro de las clases de las salidas deseadas
-    @assert(all([in(output, unique(targets)) for output in outputs]));
-    classes = unique(targets);
-    # Es importante calcular el vector de clases primero y pasarlo como argumento a las 2 llamadas a oneHotEncoding para que el orden de las clases sea el mismo en ambas matrices
-    return confusionMatrix2(oneHotEncoding(outputs, classes), oneHotEncoding(targets, classes); weighted=weighted);
-end;
 
-confusionMatrix2(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix2(classifyOutputs(outputs), targets; weighted=weighted);
-
-# De forma similar a la anterior, añado estas funcion porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
-# Con estas funcion se pueden usar indistintamente matrices de Float32 o Float64
-confusionMatrix2(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix2(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
-printConfusionMatrix2(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix2(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
+# =============================================================================
+# confusionMatrix
+# =============================================================================
 
 # Funciones auxiliares para visualizar por pantalla la matriz de confusion y las metricas que se derivan de ella
-function printConfusionMatrix2(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
-    (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix) = confusionMatrix2(outputs, targets; weighted=weighted);
+function printConfusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
+    (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix) = confusionMatrix(outputs, targets; weighted=weighted);
     numClasses = size(confMatrix,1);
     writeHorizontalLine() = (for i in 1:numClasses+1 print("--------") end; println(""); );
     writeHorizontalLine();
@@ -317,4 +241,6 @@ function printConfusionMatrix2(outputs::Array{Bool,2}, targets::Array{Bool,2}; w
     println("F1-score: ", F1);
     return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
 end;
-printConfusionMatrix2(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix2(classifyOutputs(outputs), targets; weighted=weighted)
+#Para la salida de la RNA en crudo
+printConfusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix(classifyOutputs(outputs), targets; weighted=weighted)
+printConfusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);

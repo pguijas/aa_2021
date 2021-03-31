@@ -4,23 +4,11 @@ include("modulos/datasets.jl")
 include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
-using CUDA;
-using Flux: gpu;
 
-#RECORDAR:
-#   Para revisar que esté todo bien mostrar gráficos del codigo del
-#   profe y el nuestro, conjunto test tintinea un poco
 
-#===============================================================================
-DUDAS
-    - Héctor: ¿Necesitamos medir la varianza? La varianza solo es la desviación
-        típica elevada al cuadrado, creo que estamos midiendo lo mismo. La
-        media mide la cantidad de color que tiene una imagen, y la desviacion
-        típica la dispersión del color, la varianza sigue midiendo la dispersión
-        del color, solo que al cuadrado, le estamos dando más importancia a la
-        desviación típica que a la media y la red va a aprender que es + importante
-        la dispersión que la media, cuando deberían de tener la misma importancia.
-===============================================================================#
+include("practica/matriz_confusion_pedro.jl")
+
+using Flux;
 
 # Parametros principales de la RNA y del proceso de entrenamiento
 topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
@@ -93,18 +81,6 @@ println(accuracy(Array{Float64,2}(ann(inputs')'),targets));
 outputs=((ann(inputs')').>0.5);
 outputs=convert(Array{Bool,2},outputs);
 
-
-confusionMatrix(outputs,targets,true);
-
-#println("Resultados en el conjunto de entrenamiento:")
-#trainingOutputs = (collect(ann(trainingInputs')')).>0.5;
-#printConfusionMatrix2(convert(Array{Bool,2},trainingOutputs), trainingTargets; weighted=true);
-#println("Resultados en el conjunto de validación:")
-#validationOutputs = (collect(ann(validationInputs')')).>0.5;
-#printConfusionMatrix2(convert(Array{Bool,2},validationOutputs), validationTargets; weighted=true);
-#println("Resultados en el conjunto de test:")
-#testOutputs = (collect(ann(testInputs')')).>0.5;
-#printConfusionMatrix2(convert(Array{Bool,2},testOutputs), testTargets; weighted=true);
-#println("Resultados globales:")
-#outputs = (collect(ann(inputs')')).>0.5;
-#printConfusionMatrix2(convert(Array{Bool,2},outputs), targets; weighted=true);
+#recordar cambiar todos los tipos, para pasar por la funcion classifyOutputs y olvidarnos de las putas sobrecargas de mierda
+printConfusionMatrix(outputs, targets)
+confusionMatrix_P(outputs,targets)  
