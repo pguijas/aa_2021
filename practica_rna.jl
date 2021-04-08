@@ -28,9 +28,6 @@ if (!isfile(dataset_name))
     write_dataset(dataset_name,inputs,targets)
 end
 
-# Héctor: A mi me da bastantes errores la función de escribir el dataset,
-#   quizás podríamos mejorarla.
-
 # Cargamos el dataset
 dataset = readdlm(dataset_name,',');
 
@@ -70,7 +67,7 @@ println()
 (ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
 validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
-                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true) |> gpu;
+                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
 
 print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
 
@@ -78,9 +75,9 @@ print_train_results(trainingLosses, validationLosses, testLosses, trainingAccura
 println(accuracy(Array{Float64,2}(ann(inputs')'),targets));
 
 # esto podríamos meterlo dentro de la matriz de confusión
-outputs=((ann(inputs')').>0.5);
-outputs=convert(Array{Bool,2},outputs);
+outputs=convert(Array{Float64,2},ann(inputs')');
+outputs=classifyOutputs(outputs);
+outputs=reshape(outputs,(:,1)); #para que sea en 2d (necesarios para printConfusionMatrix)
 
 #recordar cambiar todos los tipos, para pasar por la funcion classifyOutputs y olvidarnos de las putas sobrecargas de mierda
 printConfusionMatrix(outputs, targets)
-confusionMatrix_P(outputs,targets)  

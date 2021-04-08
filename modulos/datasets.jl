@@ -7,7 +7,8 @@
 #       -calculateZeroMeanNormalizationParameters
 #       -normalizeZeroMean!
 #   - holdOut (sobrecargada 2 y 3 params)
-#   - validacion cruzada(añadir en un futuro)
+#   - validacion cruzada(añadir en un futuro) -> FALTAS TU
+#   - classifyOutputs 
 # =============================================================================
 
 using FileIO;
@@ -176,4 +177,32 @@ function holdOut(N::Int, Ptest::Float64, Pval::Float64)
     # Después separamos el conjunto de entrenamiento+validation
     (trainingIndices, validationIndices) = holdOut(length(trainingValidationIndices), Pval*N/length(trainingValidationIndices))
     return (trainingValidationIndices[trainingIndices], trainingValidationIndices[validationIndices], testIndices);
+end;
+
+
+# =============================================================================
+# classifyOutputs -> Pasar de una salida en float64 a bool
+# =============================================================================
+
+#clasifyoutputs no contempla que pueda estar definido como matriz pero sea
+
+classifyOutputs(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
+function classifyOutputs(outputs::Array{Float64,2},dataInRows::Bool=true,threshold::Float64=0.5)
+    if (dataInRows)
+        # Cada patron esta en cada fila
+        if (size(targets,2)==1)
+            return classifyOutputs(outputs[:,1],threshold);
+        else
+            vmax = maximum(outputs, dims=2);
+            return Array{Bool,2}(outputs .== vmax);
+        end;
+    else
+        # Cada patron esta en cada columna
+        if (size(targets,1)==1)
+            return classifyOutputs(outputs[1,:],threshold);
+        else
+            vmax = maximum(outputs, dims=1)
+            return Array{Bool,2}(outputs .== vmax)
+        end;
+    end;
 end;

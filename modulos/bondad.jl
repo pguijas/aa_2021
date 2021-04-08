@@ -3,37 +3,13 @@
 #   - accuracy (precisión)
 #   - confusionMatrix
 #   - printConfusionMatrix
+#
+# Este módulo solo trabaja con booleanos, a excepción de accuracy que lo necesita la 
+# rna para su entrenamientos
+#
 # =============================================================================
 
 # PEDRO ACUERDATE DE CAMBIAR ACCURACY EN FLOAT64 Y USAR classifyOutputs 
-
-# =============================================================================
-# classifyOutputs -> ESTO DEBERIAMOS MOVERLO DE SITIO -> POR MI LO MOVIA A DATASETS // RNA Y QUE ESTE MODULO TRABAJASE CON BOOLS DIRECTAMENTE
-# =============================================================================
-
-#clasifyoutputs no contempla que pueda estar definido como matriz pero sea
-
-classifyOutputs(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
-function classifyOutputs(outputs::Array{Float64,2},dataInRows::Bool=true,threshold::Float64=0.5)
-    if (dataInRows)
-        # Cada patron esta en cada fila
-        if (size(targets,2)==1)
-            return classifyOutputs(outputs[:,1],threshold);
-        else
-            vmax = maximum(outputs, dims=2);
-            return Array{Bool,2}(outputs .== vmax);
-        end;
-    else
-        # Cada patron esta en cada columna
-        if (size(targets,1)==1)
-            return classifyOutputs(outputs[1,:],threshold);
-        else
-            vmax = maximum(outputs, dims=1)
-            return Array{Bool,2}(outputs .== vmax)
-        end;
-    end;
-end;
-
 
 # =============================================================================
 # Accuracy
@@ -91,7 +67,7 @@ function accuracy(outputs::Array{Float64,2}, targets::Array{Bool,2}; dataInRows:
             return accuracy(outputs, targets; dataInRows=false);
         end;
     end;
-end;
+end;    
 
 # Añado estas funciones porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
 # Con estas funciones se pueden usar indistintamente matrices de Float32 o Float64
@@ -197,12 +173,6 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
     end;
 end;
 
-#Para la salida de la RNA en crudo
-confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
-confusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(classifyOutputs(outputs), targets; weighted=weighted);
-confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
-
-
 # =============================================================================
 # confusionMatrix
 # =============================================================================
@@ -241,6 +211,3 @@ function printConfusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; we
     println("F1-score: ", F1);
     return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
 end;
-#Para la salida de la RNA en crudo
-printConfusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix(classifyOutputs(outputs), targets; weighted=weighted)
-printConfusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
