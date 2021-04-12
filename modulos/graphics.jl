@@ -11,7 +11,7 @@ function print_train_results(
     x=1:size(trainingLosses,1)
     losses=plot(x,[trainingLosses validationLosses testLosses],title = "Loss",label = ["Training" "Validation" "Test"],);
     xlabel!("Epoch");
-    ylabel!("Error (CrossEntropy (Creo))");
+    ylabel!("Error)");
     accuracy=plot(x,[trainingAccuracies validationAccuracies testAccuracies],title = "Accuracies",label = ["Training" "Validation" "Test"],);
     xlabel!("Epoch");
     ylabel!("% Accuracies");
@@ -25,7 +25,7 @@ function print_train_results(
     x=1:size(trainingLosses,1)
     losses=plot(x,[trainingLosses validationLosses testLosses],title = "Loss",label = ["Training" "Validation" "Test"],);
     xlabel!("Epoch");
-    ylabel!("Error (CrossEntropy (Creo))");
+    ylabel!("Error)");
     accuracy=plot(x,[trainingAccuracies validationAccuracies testAccuracies],title = "Accuracies",label = ["Training" "Validation" "Test"],);
     xlabel!("Epoch");
     ylabel!("% Accuracies");
