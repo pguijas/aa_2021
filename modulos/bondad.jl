@@ -9,7 +9,8 @@
 #
 # =============================================================================
 
-# PEDRO ACUERDATE DE CAMBIAR ACCURACY EN FLOAT64 Y USAR classifyOutputs 
+# PEDRO ACUERDATE DE REVISAR TODAS LAS ConfusionMatrix
+# CONCRETAMENTE, REVISAR -> confusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
 
 # =============================================================================
 # Accuracy
@@ -81,19 +82,34 @@ accuracy(outputs::Array{Float32,2}, targets::Array{Bool,2}; dataInRows::Bool=tru
 
 function confusionMatrix(outputs::Array{Bool,1}, targets::Array{Bool,1})
     @assert(length(outputs)==length(targets));
-    @assert(length(outputs)==length(targets));
     # Para calcular la precision y la tasa de error, se puede llamar a las funciones definidas en la practica 2
     acc         = accuracy(outputs, targets); # Precision, definida previamente en una practica anterior
-    errorRate   = 1 - acc;
+    errorRate   = 1. - acc;
     recall      = mean(  outputs[  targets]); # Sensibilidad
     specificity = mean(.!outputs[.!targets]); # Especificidad
     precision   = mean(  targets[  outputs]); # Valor predictivo positivo
     NPV         = mean(.!targets[.!outputs]); # Valor predictivo negativo
-    # Controlamos que algunos casos pueden ser NaN, y otros no
-    @assert(!isnan(recall) && !isnan(specificity));
-    precision   = isnan(precision) ? 0 : precision;
-    NPV         = isnan(NPV) ? 0 : NPV;
-    # Calculamos F1
+    # Controlamos que algunos casos pueden ser NaN
+    #  Para el caso de sensibilidad y especificidad, en un conjunto de entrenamiento estos no pueden ser NaN, porque esto indicaria que se ha intentado entrenar con una unica clase
+    #   Sin embargo, sí pueden ser NaN en el caso de aplicar un modelo en un conjunto de test, si este sólo tiene patrones de una clase
+    #  Para VPP y VPN, sí pueden ser NaN en caso de que el clasificador lo haya clasificado todo como negativo o positivo respectivamente
+    # En estos casos, estas metricas habria que dejarlas a NaN para indicar que no se han podido evaluar
+    #  Sin embargo, como es posible que se quiera combinar estos valores al evaluar una clasificacion multiclase, es necesario asignarles un valor. El criterio que se usa aqui es que estos valores seran igual a 0
+    # Ademas, hay un caso especial: cuando los VP son el 100% de los patrones, o los VN son el 100% de los patrones
+    #  En este caso, el sistema ha actuado correctamente, así que controlamos primero este caso
+    if isnan(recall) && isnan(precision) # Los VN son el 100% de los patrones
+        recall = 1.;
+        precision = 1.;
+    elseif isnan(specificity) && isnan(NPV) # Los VP son el 100% de los patrones
+        specificity = 1.;
+        NPV = 1.;
+    end;
+    # Ahora controlamos los casos en los que no se han podido evaluar las metricas excluyendo los casos anteriores
+    recall      = isnan(recall)      ? 0. : recall;
+    specificity = isnan(specificity) ? 0. : specificity;
+    precision   = isnan(precision)   ? 0. : precision;
+    NPV         = isnan(NPV)         ? 0. : NPV;
+    # Calculamos F1, teniendo en cuenta que si sensibilidad o VPP es NaN (pero no ambos), el resultado tiene que ser 0 porque si sensibilidad=NaN entonces VPP=0 y viceversa
     F1          = (recall==precision==0.) ? 0. : 2*(recall*precision)/(recall+precision);
     # Reservamos memoria para la matriz de confusion
     confMatrix = Array{Int64,2}(undef, 2, 2);
@@ -173,11 +189,24 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
     end;
 end;
 
+
+function confusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
+    # Comprobamos que todas las clases de salida esten dentro de las clases de las salidas deseadas
+    @assert(all([in(output, unique(targets)) for output in outputs]));
+    classes = unique(targets);
+    # Es importante calcular el vector de clases primero y pasarlo como argumento a las 2 llamadas a oneHotEncoding para que el orden de las clases sea el mismo en ambas matrices
+    return confusionMatrix(oneHotEncoding(outputs, classes), oneHotEncoding(targets, classes); weighted=weighted);
+end;
+
+confusionMatrix(outputs::Array{Float64,1}, targets::Array{Bool,1}; threshold::Float64=0.5) = confusionMatrix(Array{Bool,1}(outputs.>=threshold), targets);
+confusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(classifyOutputs(outputs), targets; weighted=weighted);
+confusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = confusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
+
+
 # =============================================================================
-# confusionMatrix
+# printConfusionMatrix
 # =============================================================================
 
-# Funciones auxiliares para visualizar por pantalla la matriz de confusion y las metricas que se derivan de ella
 function printConfusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighted::Bool=true)
     (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix) = confusionMatrix(outputs, targets; weighted=weighted);
     numClasses = size(confMatrix,1);
@@ -211,3 +240,6 @@ function printConfusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; we
     println("F1-score: ", F1);
     return (acc, errorRate, recall, specificity, precision, NPV, F1, confMatrix);
 end;
+printConfusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix(classifyOutputs(outputs), targets; weighted=weighted)
+printConfusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
+
