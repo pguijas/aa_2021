@@ -30,24 +30,28 @@ using Random: randperm;
 #
 # @return: outputs en one-hot-encoding
 #
-function oneHotEncoding(feature::Array{Any,1})::Array{Bool,2}
-    classes = unique(feature);
+function oneHotEncoding(feature::Array{Any,1}, classes::Array{Any,1})
+    # Primero se comprueba que todos los elementos del vector esten en el vector de clases (linea adaptada del final de la practica 4)
+    @assert(all([in(value, classes) for value in feature]));
     numClasses = length(classes);
     @assert(numClasses>1)
     if (numClasses==2)
+        # Si solo hay dos clases, se devuelve una matriz con una columna
         oneHot = Array{Bool,2}(undef, size(feature,1), 1);
         oneHot[:,1] .= (feature.==classes[1]);
     else
+        # Si hay mas de dos clases se devuelve una matriz con una columna por clase
         oneHot = Array{Bool,2}(undef, size(feature,1), numClasses);
         for numClass = 1:numClasses
             oneHot[:,numClass] .= (feature.==classes[numClass]);
         end;
     end;
-    return oneHot
+    return oneHot;
 end;
-# en caso de que ya sea un array de bools con una sola salida, lo devolvemos
+# Extraemos las clases distintas con unique
+oneHotEncoding(feature::Array{Any,1}) = oneHotEncoding(feature::Array{Any,1}, unique(feature));
+#  En este caso, el propio vector ya está codificado
 oneHotEncoding(feature::Array{Bool,1}) = feature;
-
 
 # =============================================================================
 # Funciones útiles para la normalización de un dataset
