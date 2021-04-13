@@ -184,25 +184,19 @@ end;
 # classifyOutputs -> Pasar de una salida en float64 a bool
 # =============================================================================
 
-#clasifyoutputs no contempla que pueda estar definido como matriz pero sea
-
-classifyOutputs(outputs::Array{Float64,1},threshold::Float64=0.5)=Array{Bool,1}(outputs.>=threshold)
-function classifyOutputs(outputs::Array{Float64,2},dataInRows::Bool=true,threshold::Float64=0.5)
-    if (dataInRows)
-        # Cada patron esta en cada fila
-        if (size(targets,2)==1)
-            return classifyOutputs(outputs[:,1],threshold);
-        else
-            vmax = maximum(outputs, dims=2);
-            return Array{Bool,2}(outputs .== vmax);
-        end;
+function classifyOutputs(outputs::Array{Float64,2}; dataInRows::Bool=true, threshold::Float64=0.5)
+    numOutputs = size(outputs, dataInRows ? 2 : 1);
+    @assert(numOutputs!=2)
+    if numOutputs==1
+        return convert(Array{Bool,2}, outputs.>=threshold);
     else
-        # Cada patron esta en cada columna
-        if (size(targets,1)==1)
-            return classifyOutputs(outputs[1,:],threshold);
-        else
-            vmax = maximum(outputs, dims=1)
-            return Array{Bool,2}(outputs .== vmax)
-        end;
+        # Miramos donde esta el valor mayor de cada instancia con la funcion findmax
+        (_,indicesMaxEachInstance) = findmax(outputs, dims= dataInRows ? 2 : 1);
+        # Creamos la matriz de valores booleanos con valores inicialmente a false y asignamos esos indices a true
+        outputsBoolean = Array{Bool,2}(falses(size(outputs)));
+        outputsBoolean[indicesMaxEachInstance] .= true;
+        # Comprobamos que efectivamente cada patron solo este clasificado en una clase
+        @assert(all(sum(outputsBoolean, dims=dataInRows ? 2 : 1).==1));
+        return outputsBoolean;
     end;
 end;

@@ -32,20 +32,8 @@ end
 dataset = readdlm(dataset_name,',');
 
 # Preparamos las entradas y las salidas deseadas
-inputs = convert(Array{Float64,2}, dataset[:,1:6]);
-targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));
-
-println()
-print("Inputs: ")
-print(size(inputs))
-print(", ")
-print(typeof(inputs))
-
-println()
-print("Targets: ")
-print(size(targets))
-print(", ")
-println(typeof(targets))
+inputs = convert(Array{Float64,2}, dataset[:,1:6]);             #Array{Float64,2}
+targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));   #Array{Bool,2}
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);
@@ -67,17 +55,11 @@ println()
 (ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
 validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
                                             validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
-                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=true);
+                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=false);
 
 print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
 
-#Resultados finales sobre todos los patrones:
-println(accuracy(Array{Float64,2}(ann(inputs')'),targets));
-
 # esto podríamos meterlo dentro de la matriz de confusión
 outputs=convert(Array{Float64,2},ann(inputs')');
-outputs=classifyOutputs(outputs);
-outputs=reshape(outputs,(:,1)); #para que sea en 2d (necesarios para printConfusionMatrix)
-
-#recordar cambiar todos los tipos, para pasar por la funcion classifyOutputs y olvidarnos de las putas sobrecargas de mierda
-printConfusionMatrix(outputs, targets)
+outputs=classifyOutputs(outputs); #Array{Bool,2}
+printConfusionMatrix(outputs, targets);
