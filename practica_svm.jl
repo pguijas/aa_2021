@@ -1,19 +1,10 @@
 include("modulos/bondad.jl")
 include("modulos/graphics.jl")
 include("modulos/datasets.jl")
-include("modulos/rna.jl")
 include("modulos/svm.jl")
 include("modulos/attributes_from_dataset.jl")
 
 using Flux;
-
-# Parametros principales de la RNA y del proceso de entrenamiento
-topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
-learningRate = 0.01; # Tasa de aprendizaje
-numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
-validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion
-testRatio = 0.2; # Porcentaje de patrones que se usaran para test
-maxEpochsVal = 15; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 
 # Parametros del SVM
 kernel = "rbf";
@@ -56,10 +47,10 @@ println("Empezando el entrenamiento.")
 println()
 
 # Entrenamento SVM
-model = trainClassSVM(trainingInputs, trainingTargets, testInputs, testTargets;
+svm = trainClassSVM(trainingInputs, trainingTargets, testInputs, testTargets;
             kernel=kernel, kernelDegree=kernelDegree, kernelGamma=kernelGamma, C=C);
 
 # esto podríamos meterlo dentro de la matriz de confusión
-testOutputs=copy(convert(Array{Float64,2},predict(model,testInputs)')');
+testOutputs=copy(convert(Array{Float64,2},predict(svm,inputs)')');
 testOutputs=classifyOutputs(testOutputs); #Array{Bool,2}
-printConfusionMatrix(testOutputs, testTargets);
+printConfusionMatrix(testOutputs, targets);
