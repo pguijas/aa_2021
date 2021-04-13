@@ -154,8 +154,6 @@ function confusionMatrix(outputs::Array{Bool,2}, targets::Array{Bool,2}; weighte
             (_, _, recall[numClass], specificity[numClass], precision[numClass], NPV[numClass], F1[numClass], _) = confusionMatrix(outputs[:,numClass], targets[:,numClass]);
         end;
 
-        # Reservamos memoria para la matriz de confusion
-        confMatrix = Array{Int64,2}(undef, numClasses, numClasses);
         # Calculamos la matriz de confusión haciendo un bucle doble que itere sobre las clases
         for numClassTarget in 1:numClasses, numClassOutput in 1:numClasses
             # Igual que antes, ponemos en las filas los que pertenecen a cada clase (targets) y en las columnas los clasificados (outputs)
