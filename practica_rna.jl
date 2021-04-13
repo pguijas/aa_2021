@@ -4,10 +4,6 @@ include("modulos/datasets.jl")
 include("modulos/rna.jl")
 include("modulos/attributes_from_dataset.jl")
 
-
-
-include("practica/matriz_confusion_pedro.jl")
-
 using Flux;
 
 # Parametros principales de la RNA y del proceso de entrenamiento
