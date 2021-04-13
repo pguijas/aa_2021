@@ -2,10 +2,8 @@ include("modulos/bondad.jl")
 include("modulos/graphics.jl")
 include("modulos/datasets.jl")
 include("modulos/rna.jl")
+include("modulos/svm.jl")
 include("modulos/attributes_from_dataset.jl")
-
-
-
 include("practica/matriz_confusion_pedro.jl")
 
 using Flux;
@@ -17,6 +15,12 @@ numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion
 testRatio = 0.2; # Porcentaje de patrones que se usaran para test
 maxEpochsVal = 15; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
+
+# Parametros del SVM
+kernel = "rbf";
+kernelDegree = 3;
+kernelGamma = 2;
+C=1;
 
 #Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
@@ -49,17 +53,36 @@ trainingTargets   = targets[trainingIndices,:];
 validationTargets = targets[validationIndices,:];
 testTargets       = targets[testIndices,:];
 
+# Tipo de entrenamiento
+modelType=:SVM;
+
 println("Empezando el entrenamiento.")
 println()
-# Y creamos y entrenamos la RNA con los parametros dados
-(ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
-validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
-                                            validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
-                                            learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=false);
 
-print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
+if modelType==:RNA
 
-# esto podríamos meterlo dentro de la matriz de confusión
-outputs=convert(Array{Float64,2},ann(inputs')');
-outputs=classifyOutputs(outputs); #Array{Bool,2}
-printConfusionMatrix(outputs, targets);
+    # Y creamos y entrenamos la RNA con los parametros dados
+    (ann, trainingLosses, validationLosses, testLosses, trainingAccuracies,
+    validationAccuracies, testAccuracies) = trainClassANN(topology, trainingInputs, trainingTargets, validationInputs,
+                                                validationTargets, testInputs, testTargets; maxEpochs=numMaxEpochs,
+                                                learningRate=learningRate, maxEpochsVal=maxEpochsVal, showText=false);
+
+    print_train_results(trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
+
+    # esto podríamos meterlo dentro de la matriz de confusión
+    outputs=convert(Array{Float64,2},ann(inputs')');
+    outputs=classifyOutputs(outputs); #Array{Bool,2}
+    printConfusionMatrix(outputs, targets);
+
+elseif modelType==:SVM
+
+    # Entrenamento SVM
+    model = trainClassSVM(trainingInputs, trainingTargets, testInputs, testTargets;
+                kernel=kernel, kernelDegree=kernelDegree, kernelGamma=kernelGamma, C=C);
+
+    # esto podríamos meterlo dentro de la matriz de confusión
+    testOutputs=copy(convert(Array{Float64,2},predict(model,testInputs)')');
+    testOutputs=classifyOutputs(testOutputs); #Array{Bool,2}
+    printConfusionMatrix(testOutputs, testTargets);
+
+end
