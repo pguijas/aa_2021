@@ -161,10 +161,10 @@ function visualize_hector(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64
     img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 13):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya abajo
 
     # nariz
-    img[(h ÷ 20 * 3):(h ÷ 20 * 11), (w ÷ 20 * 7):(w ÷ 20 * 7)]   .= RGB(0,0,1); #raya derecha
-    img[(h ÷ 20 * 3):(h ÷ 20 * 3),  (w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya arriba
-    img[(h ÷ 20 * 3):(h ÷ 20 * 11), (w ÷ 20 * 13):(w ÷ 20 * 13)] .= RGB(0,0,1); #raya derecha
-    img[(h ÷ 20 * 11):(h ÷ 20 * 11),(w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya abajo
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 7)]   .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 13)] .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya abajo
 
     # boca
     img[(h ÷ 20 * 10):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 4)]  .= RGB(1,0,0); #raya derecha
@@ -173,7 +173,7 @@ function visualize_hector(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64
     img[(h ÷ 20 * 16):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(1,0,0); #raya abajo
 
     display(img);
-    save("/home/hector/Downloads/char_2.jpeg", img)
+    save("/home/hector/Downloads/char_hec.jpeg", img)
 end;
 
 function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2}}
@@ -184,7 +184,7 @@ function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array
     right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
     left_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20 * 7)];
     right_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 19)];
-    nose = image[(h ÷ 20 * 3):(h ÷ 20 * 11), (w ÷ 20 * 7):(w ÷ 20 * 13)];
+    nose = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 13)];
     mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
 
     visualize_hector(img, h, w);
@@ -192,7 +192,7 @@ function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array
     return (left_eye, right_eye, left_checkb, right_checkb, nose, mouth);
 end;
 
-img = load("../datasets/cara_positivo/35.jpeg");
+img = load("../datasets/cara_positivo/3.jpeg");
 
 #(feature1, feature2, feature3) = face_features(img);
 #display(feature1)
