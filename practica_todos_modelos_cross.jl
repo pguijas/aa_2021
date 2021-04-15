@@ -31,7 +31,7 @@ numNeighbors = 3;
 #Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
 if (!isfile(dataset_name))
-    (inputs, targets) = getInputs("datasets");
+    (inputs, targets) = getInputs("../AA_DATASET");
     println("Tamaños en la generación:")
     println(size(inputs))
     println(size(targets))
@@ -43,7 +43,7 @@ dataset = readdlm(dataset_name,',');
 
 # Preparamos las entradas y las salidas deseadas
 inputs = convert(Array{Float64,2}, dataset[:,1:6]);             #Array{Float64,2}
-targets = convert(Array{Any,1},dataset[:,7]);   #Array{Bool,2}
+targets = convert(Array{Any,1},dataset[:,7]);                   #Array{Bool,2}
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);

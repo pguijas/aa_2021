@@ -50,7 +50,7 @@ end;
 
 # Funcion para cargar todo el dataset (positivos y negativos)
 function loadDataset(folderName::String)
-    positiveDataset = loadFolderImages(string(folderName, "/cara_positivo"));
+    positiveDataset = loadFolderImages(string(folderName, "/recortes"));
     negativeDataset = loadFolderImages(string(folderName, "/cara_negativo"));
     return (positiveDataset, negativeDataset);
 end;
