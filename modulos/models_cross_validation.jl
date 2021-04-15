@@ -63,12 +63,13 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
             model = fit!(model, trainingInputs, trainingTargets);
 
             # Pasamos el conjunto de test
-            testOutputs = convert(Array{Bool,1},predict(model, testInputs));
-            testTargets = convert(Array{Float64,1},testTargets);
+            testOutputs =convert(Array{Any,1},predict(model, testInputs));
+
             # Calculamos las metricas correspondientes con la funcion desarrollada en la practica anterior
-            (acc, _, _, _, _, _, F1, _) = confusionMatrix(testTargets, testOutputs);
+            (acc, _, _, _, _, _, F1, _) = confusionMatrix(testOutputs, testTargets);
 
         else
+
             # Vamos a usar RR.NN.AA.
             @assert(modelType==:ANN);
 

@@ -153,3 +153,76 @@ function trainClassANN(topology::Array{Int64,1}, trainingInputs::Array{Float64,2
     end;
     return (bestANN, trainingLosses, validationLosses, testLosses, trainingAccuracies, validationAccuracies, testAccuracies);
 end;
+
+
+#sin validacion
+function trainClassANN(topology::Array{Int64,1},
+    trainingInputs::Array{Float64,2}, trainingTargets::Array{Bool,2},
+    testInputs::Array{Float64,2},     testTargets::Array{Bool,2};
+    maxEpochs::Int64=1000, minLoss::Float64=0.0, learningRate::Float64=0.1, showText::Bool=false)
+
+    # Se supone que tenemos cada patron en cada fila
+    # Comprobamos que el numero de filas (numero de patrones) coincide tanto en entrenamiento como en test
+    @assert(size(trainingInputs,1)==size(trainingTargets,1));
+    @assert(size(testInputs,1)==size(testTargets,1));
+    # Comprobamos que el numero de columnas coincide en los grupos de entrenamiento y test
+    @assert(size(trainingInputs,2)==size(testInputs,2));
+    @assert(size(trainingTargets,2)==size(testTargets,2));
+    # Creamos la RNA
+    ann = buildClassANN(size(trainingInputs,2), topology, size(trainingTargets,2));
+    # Definimos la funcion de loss
+    loss(x,y) = (size(y,1) == 1) ? Losses.binarycrossentropy(ann(x),y) : Losses.crossentropy(ann(x),y);
+    # Creamos los vectores con los valores de loss y de precision en cada ciclo
+    trainingLosses = Float64[];
+    trainingAccuracies = Float64[];
+    testLosses = Float64[];
+    testAccuracies = Float64[];
+    # Empezamos en el ciclo 0
+    numEpoch = 0;
+
+    # Una funcion util para calcular los resultados y mostrarlos por pantalla
+    function calculateMetrics()
+        # Calculamos el loss en entrenamiento y test. Para ello hay que pasar las matrices traspuestas (cada patron en una columna)
+        trainingLoss = loss(trainingInputs', trainingTargets');
+        testLoss     = loss(testInputs',     testTargets');
+        # Calculamos la salida de la RNA en entrenamiento y test. Para ello hay que pasar la matriz de entradas traspuesta (cada patron en una columna). La matriz de salidas tiene un patron en cada columna
+        trainingOutputs = ann(trainingInputs');
+        testOutputs     = ann(testInputs');
+        # Para calcular la precision, ponemos 2 opciones aqui equivalentes:
+        #  Pasar las matrices con los datos en las columnas. La matriz de salidas ya tiene un patron en cada columna
+        trainingAcc = accuracy(trainingOutputs, Array{Bool,2}(trainingTargets'); dataInRows=false);
+        testAcc     = accuracy(testOutputs,     Array{Bool,2}(testTargets');     dataInRows=false);
+        #  Pasar las matrices con los datos en las filas. Hay que trasponer la matriz de salidas de la RNA, puesto que cada dato esta en una fila
+        trainingAcc = accuracy(Array{Float64,2}(trainingOutputs'), trainingTargets; dataInRows=true);
+        testAcc     = accuracy(Array{Float64,2}(testOutputs'),     testTargets;     dataInRows=true);
+        # Mostramos por pantalla el resultado de este ciclo de entrenamiento si nos lo han indicado
+        if showText
+            println("Epoch ", numEpoch, ": Training loss: ", trainingLoss, ", accuracy: ", 100*trainingAcc, " % - Test loss: ", testLoss, ", accuracy: ", 100*testAcc, " %");
+        end;
+        return (trainingLoss, trainingAcc, testLoss, testAcc)
+    end;
+
+    # Calculamos las metricas para el ciclo 0 (sin entrenar nada)
+    (trainingLoss, trainingAccuracy, testLoss, testAccuracy) = calculateMetrics();
+    #  y almacenamos los valores de loss y precision en este ciclo
+    push!(trainingLosses,      trainingLoss);
+    push!(testLosses,          testLoss);
+    push!(trainingAccuracies,  trainingAccuracy);
+    push!(testAccuracies,      testAccuracy);
+
+    # Entrenamos hasta que se cumpla una condicion de parada
+    while (numEpoch<maxEpochs) && (trainingLoss>minLoss)
+        # Entrenamos 1 ciclo. Para ello hay que pasar las matrices traspuestas (cada patron en una columna)
+        Flux.train!(loss, params(ann), [(trainingInputs', trainingTargets')], ADAM(learningRate));
+        # Aumentamos el numero de ciclo en 1
+        numEpoch += 1;
+        # Calculamos las metricas en este ciclo
+        (trainingLoss, trainingAccuracy, testLoss, testAccuracy) = calculateMetrics();
+        #  y almacenamos los valores de loss y precision en este ciclo
+        push!(trainingLosses,     trainingLoss);
+        push!(trainingAccuracies, trainingAccuracy);
+        push!(testLosses,         testLoss);
+        push!(testAccuracies,     testAccuracy);
+    end;
+    return (ann, trainingLosses, testLosses, trainingAccuracies, testAccuracies);
+end;

@@ -17,11 +17,11 @@ learningRate = 0.01;            # Tasa de aprendizaje
 numMaxEpochs = 1000;            # Numero maximo de ciclos de entrenamiento
 numFolds = 10;
 validationRatio = 0.2;          # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
-maxEpochsVal = 6;               # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
+maxEpochsVal = 30;               # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
 numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA para cada fold por el hecho de ser no determinístico el entrenamiento
 
 #Si no está generado el dataset pues lo creamos
-dataset_name="datasets/iris.data"
+dataset_name="datasets/faces.data"
 if (!isfile(dataset_name))
     (inputs, targets) = getInputs("datasets");
     println("Tamaños en la generación:")
