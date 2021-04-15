@@ -115,7 +115,6 @@ function trainClassANN(topology::Array{Int64,1}, trainingInputs::Array{Float64,2
     # Calculamos las metricas para el ciclo 0 (sin entrenar nada)
     (trainingLoss, trainingAccuracy, validationLoss, validationAccuracy, testLoss, testAccuracy) = calculateMetrics();
     #  y almacenamos los valores de loss y precision en este ciclo
-    println(trainingLoss)
     push!(trainingLosses, trainingLoss);
     push!(trainingAccuracies, trainingAccuracy);
     push!(validationLosses, validationLoss);
