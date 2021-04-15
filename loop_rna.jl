@@ -11,19 +11,16 @@ using Random:seed!;
 
 function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topology::Array{Int64,1})
 
-    learningRate = 0.01;            # Tasa de aprendizaje
-    numMaxEpochs = 1000;            # Numero maximo de ciclos de entrenamiento
+    learningRate = 0.01;
+    numMaxEpochs = 1000;
     numFolds = 10;
-    validationRatio = 0.2;          # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
-    maxEpochsVal = 30;               # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
-    numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA para cada fold por el hecho de ser no determinístico el entrenamiento
-    # IMPORTANTE!!! ¿QUÉ MÉTRICAS USAR?
-    # Creamos los vectores para las metricas que se vayan a usar
-    # En este caso, solo voy a usar precision y F1, en otro problema podrían ser distintas
+    validationRatio = 0.2;
+    maxEpochsVal = 30;
+    numRepetitionsAANTraining = 50;
+
     testAccuracies = Array{Float64,1}(undef, numFolds);
     testF1         = Array{Float64,1}(undef, numFolds);
 
-    # Creamos los indices de crossvalidation
     crossValidationIndices = crossvalidation(size(inputs,1), numFolds);
 
     for numFold in 1:numFolds
@@ -58,14 +55,11 @@ function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topolog
             (acc, _, _, _, _, _, F1, _) = confusionMatrix(collect(ann(testInputs')'), testTargets);
 
             testAccuraciesEachRepetition[numTraining] = acc;
-            #println(string("Acc (numTraining:", numTraining, ") -> ", string(acc)))
             testF1EachRepetition[numTraining]         = F1;
 
         end;
         testAccuracies[numFold] = mean(testAccuraciesEachRepetition);
         testF1[numFold]         = mean(testF1EachRepetition);
-
-        #println("Results in test in fold ", numFold, "/", numFolds, ": accuracy: ", 100*testAccuracies[numFold], " %, F1: ", 100*testF1[numFold], " %");
 
     end;
     @show(topology)
@@ -101,12 +95,6 @@ end;
 
 seed!(1);
 
-#nº elementos
-
-# Parametros principales de la RNA y del proceso de entrenamiento
-#topology = [4, 3];              # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
-
-#Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
 if (!isfile(dataset_name))
     (inputs, targets) = getInputs("datasets");
