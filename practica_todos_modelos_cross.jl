@@ -9,7 +9,7 @@ seed!(1);
 numFolds = 10;
 
 # Parametros principales de la RNA y del proceso de entrenamiento
-topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
+topology = [9]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
 numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
@@ -18,7 +18,7 @@ numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA pa
 
 # Parametros del SVM
 kernel = "rbf";
-kernelDegree = 3;
+kernelDegree = 15;
 kernelGamma = 2;
 C=1;
 
@@ -26,7 +26,7 @@ C=1;
 maxDepth = 4;
 
 # Parapetros de kNN
-numNeighbors = 3;
+numNeighbors = 5;
 
 #Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
