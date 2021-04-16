@@ -66,27 +66,23 @@ function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topolog
     println("Average test accuracy on a ", numFolds, "-fold crossvalidation: ", 100*mean(testAccuracies), ", with a standard deviation of ", 100*std(testAccuracies));
     println("Average test F1 on a ", numFolds, "-fold crossvalidation: ", 100*mean(testF1), ", with a standard deviation of ", 100*std(testF1));
     println()
+    return (topology, mean(testAccuracies), std(testAccuracies), mean(testF1), std(testF1))
 end;
 
 function rna_loop_1(inputs::Array{Float64,2}, targets::Array{Bool,2})
-    nnpplayer = 10;
-    best_precision = 0;
-    best_f1 = 0;
-    best_topology = 0;
+    nnpplayer = 18;
     for i in 1:nnpplayer
-        topology_test(inputs, targets, [i])
+        (topology, meanTestAccuracies, stdTestAccuracies,
+            meanTestF1, stdTestF1) = topology_test(inputs, targets, [i])
     end;
-    return (best_precision, best_f1, best_topology)
 end;
 
 function rna_loop_2(inputs::Array{Float64,2}, targets::Array{Bool,2})
     nnpplayer = 8;
-    best_precision = 0;
-    best_f1 = 0;
-    best_topology = [0, 0];
     for i in 3:nnpplayer
         for j in 3:nnpplayer
-            topology_test(inputs, targets, [i,j])
+            (topology, meanTestAccuracies, stdTestAccuracies,
+                meanTestF1, stdTestF1) = topology_test(inputs, targets, [i,j])
         end;
     end;
     return (best_precision, best_f1, best_topology)
@@ -112,17 +108,56 @@ inputs = convert(Array{Float64,2}, dataset[:,1:6]);             #Array{Float64,2
 targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));   #Array{Bool,2}
 
 
+architecture_array  = [];#Array{String,1}(undef, 52);
+acc_array  = [];# Array{Float64,1}(undef, 52);
+f1_array  = [];# Array{Float64,1}(undef, 52);
+
 @time begin
-    topology_test(inputs,targets,[0])
-    #rna_loop_1(inputs,targets)
-    #rna_loop_2(inputs,targets)
-    #topology_test(inputs,targets,[4,5,3])
-    #topology_test(inputs,targets,[5,4,5])
-    #topology_test(inputs,targets,[4,8,3])
-    #topology_test(inputs,targets,[7,5,6])
-    #topology_test(inputs,targets,[5,5,7])
-    #topology_test(inputs,targets,[7,8,3])
-    #topology_test(inputs,targets,[5,6,4])
-    #topology_test(inputs,targets,[6,7,5])
-    #topology_test(inputs,targets,[4,5,4])
+    (topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[0])
+    push!(architecture_array, string(0));
+    push!(acc_array, testAccuracies);
+    push!(f1_array, F1Score);
+    #rna_loop_1!(inputs,targets,architecture_array,acc_array,f1_array)
+    #rna_loop_2!(inputs,targets,architecture_array,acc_array,f1_array)
+    (topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[4,5,3])
+    push!(architecture_array, string(4,",",5,",",3));
+    push!(acc_array, testAccuracies);
+    push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[5,4,5])
+    #push!(architecture_array, string(5,",",4,",",5));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[4,8,3])
+    #push!(architecture_array, string(4,",",8,",",3));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[7,5,6])
+    #push!(architecture_array, string(7,",",5,",",6));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[5,5,7])
+    #push!(architecture_array, string(5,",",5,",",7));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[7,8,3])
+    #push!(architecture_array, string(7,",",8,",",3));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[5,6,4])
+    #push!(architecture_array, string(5,",",6,",",4));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[6,7,5])
+    #push!(architecture_array, string(6,",",7,",",5));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
+    #(topology, testAccuracies, _, F1Score, _) = topology_test(inputs,targets,[4,5,4])
+    #push!(architecture_array, string(4,",",5,",",4));
+    #push!(acc_array, testAccuracies);
+    #push!(f1_array, F1Score);
 end;
+
+graph=plot(architecture_array,[acc_array f1_array],title = "Precisión con diferentes topologías",label = ["Accurracy" "F1-score"],);
+xlabel!("Topología");
+ylabel!("Precisión");
+display(plot(graph));

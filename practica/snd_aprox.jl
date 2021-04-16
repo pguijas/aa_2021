@@ -193,7 +193,7 @@ function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array
 end;
 
 #img = load("../datasets/cara_positivo/3.jpeg");
-img = load("/Users/pguijas/Documents/UDC/3º/AA/AA_DATASET/recortes/3.jpeg");
+img = load("/home/hector/Downloads/ex1.jpeg");
 img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #(feature1, feature2, feature3) = face_features(img);
 #display(feature1)
