@@ -17,3 +17,14 @@ function print_train_results(
     ylabel!("% Accuracies");
     display(plot(losses,accuracy));
 end
+
+
+function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, N::Int64, xlabel::String)
+    m = plot([1:N],mean_acc,title = "Accurracies",label = "Accurracy",);
+    xlabel!(xlabel);
+    ylabel!("Precision");
+    stdd = plot([1:N],sdev,title = "Standard Deviation",label = "std",);
+    xlabel!(xlabel);
+    ylabel!("%");
+    display(plot(m,stdd));
+end

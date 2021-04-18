@@ -1,17 +1,129 @@
-include("modulos/model.jl")
-include("modulos/graphics.jl")
 include("modulos/datasets.jl")
 include("modulos/attributes_from_dataset.jl")
+include("modulos/models_cross_validation.jl")
+include("modulos/graphics.jl")
 
 
-#RECORDAR:
-#   Para revisar que esté todo bien mostrar gráficos del codigo del
-#   profe y el nuestro, conjunto test tintinea un poco
+function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topology::Array{Int64,1}, numFolds::Int64)
 
-#Dudas:
-#   QUE POOLLAS ES EL weighted¿?¿?¿?¿?¿?
+    learningRate = 0.01;
+    numMaxEpochs = 1000;
+    validationRatio = 0.2;
+    maxEpochsVal = 30;
+    numRepetitionsAANTraining = 50;
 
-#Si no está generado el dataset pues lo creamos
+    testAccuracies = Array{Float64,1}(undef, numFolds);
+    testF1         = Array{Float64,1}(undef, numFolds);
+
+    crossValidationIndices = crossvalidation(size(inputs,1), numFolds);
+
+    for numFold in 1:numFolds
+
+        local trainingInputs, testInputs, trainingTargets, testTargets;
+        trainingInputs    = inputs[crossValidationIndices.!=numFold,:];
+        testInputs        = inputs[crossValidationIndices.==numFold,:];
+        trainingTargets   = targets[crossValidationIndices.!=numFold,:];
+        testTargets       = targets[crossValidationIndices.==numFold,:];
+
+        testAccuraciesEachRepetition = Array{Float64,1}(undef, numRepetitionsAANTraining);
+        testF1EachRepetition         = Array{Float64,1}(undef, numRepetitionsAANTraining);
+
+        for numTraining in 1:numRepetitionsAANTraining
+
+            local trainingIndices, validationIndices;
+            (trainingIndices, validationIndices) = holdOut(size(trainingInputs,1), validationRatio*size(trainingInputs,1)/size(inputs,1));
+
+            local ann;
+            (ann, training_acc, _, _, _, _, _) = trainClassANN(topology,
+                trainingInputs[trainingIndices,:],   trainingTargets[trainingIndices,:],
+                trainingInputs[validationIndices,:], trainingTargets[validationIndices,:],
+                testInputs,                          testTargets;
+                maxEpochs=numMaxEpochs, learningRate=learningRate, maxEpochsVal=maxEpochsVal);
+            #=  Sin validación
+            local ann;
+            ann, = trainClassANN(topology,
+                trainingInputs, trainingTargets,
+                testInputs,     testTargets;
+                maxEpochs=numMaxEpochs, learningRate=learningRate);
+                =#
+            (acc, _, _, _, _, _, F1, _) = confusionMatrix(collect(ann(testInputs')'), testTargets);
+
+            testAccuraciesEachRepetition[numTraining] = acc;
+            testF1EachRepetition[numTraining]         = F1;
+
+        end;
+        testAccuracies[numFold] = mean(testAccuraciesEachRepetition);
+        testF1[numFold]         = mean(testF1EachRepetition);
+
+    end;
+    @show(topology)
+    println("Average test accuracy on a ", numFolds, "-fold crossvalidation: ", 100*mean(testAccuracies), ", with a standard deviation of ", 100*std(testAccuracies));
+    println("Average test F1 on a ", numFolds, "-fold crossvalidation: ", 100*mean(testF1), ", with a standard deviation of ", 100*std(testF1));
+    println()
+    return (topology, mean(testAccuracies), std(testAccuracies), mean(testF1), std(testF1))
+end;
+
+function rna_loop_1(inputs::Array{Float64,2}, targets::Array{Bool,2}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+    for i in stlynn:nnpplayer
+        (topology, meanTestAccuracies, stdTestAccuracies,
+            meanTestF1, stdTestF1) = topology_test(inputs, targets, [i], numFolds)
+    end;
+end;
+
+function rna_loop_2(inputs::Array{Float64,2}, targets::Array{Bool,2}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+    for i in stlynn:nnpplayer
+        for j in stlynn:nnpplayer
+            (topology, meanTestAccuracies, stdTestAccuracies,
+                meanTestF1, stdTestF1) = topology_test(inputs, targets, [i,j], numFolds)
+        end;
+    end;
+end;
+
+function testDecisionTree(inputs::Array{Float64,2}, targets::Array{Any,1}, maxDepth::Int64, numFolds::Int64)
+    mean_acc = [];
+    sdev = [];
+
+    for depth in 1:maxDepth
+        (testAccuracies, testStd, _, _) = modelCrossValidation(:DecisionTree, Dict("maxDepth" => depth), inputs, targets, numFolds);
+        push!(mean_acc,testAccuracies);
+        push!(sdev,testStd);
+    end;
+
+    m = plot([1:maxDepth],mean_acc,title = "Accurracies",label = "Accurracy",);
+    xlabel!("maxDepth");
+    ylabel!("Precision");
+    stdd = plot([1:maxDepth],sdev,title = "Standard Deviation",label = "std",);
+    xlabel!("maxDepth");
+    ylabel!("%");
+    display(plot(m,stdd))
+end;
+
+function testKNN(inputs::Array{Float64,2}, targets::Array{Any,1}, max_Neigh::Int64, numFolds::Int64)
+    mean_acc = [];
+    sdev = [];
+
+    for numNeighbors in 1:max_Neigh
+        (testAccuracies, testStd, _, _) = modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
+        push!(mean_acc,testAccuracies);
+        push!(sdev,testStd);
+    end;
+
+    printAccStd(mean_acc, sdev, max_Neigh, "Number of Neighbors")
+end
+
+function testingModels(modelType::Symbol, parameters::Dict, inputs::Array{Float64,2}, targets::Array{Any,1}, numFolds::Int64)#, topology::Array{Int64,1})
+    if modelType==:ANN
+        rna_loop_1(inputs,targets,parameters["maxNNxlayer"],parameters["fstNeuron"],numFolds);
+    elseif modelType==:SVM
+        println("svm")
+    elseif modelType==:DecisionTree
+        testDecisionTree(inputs,targets,parameters["maxDepth"],numFolds)
+    else
+        testKNN(inputs,targets,parameters["maxNeighbors"],numFolds)
+    end;
+end
+
+
 dataset_name="datasets/faces.data"
 if (!isfile(dataset_name))
     (inputs, targets) = getInputs("datasets");
@@ -21,75 +133,27 @@ if (!isfile(dataset_name))
     write_dataset(dataset_name,inputs,targets)
 end
 
-# Cargamos el dataset
 dataset = readdlm(dataset_name,',');
 
+inputs = convert(Array{Float64,2}, dataset[:,1:6]);
+targets = convert(Array{Any,1},dataset[:,7]);
 
-
-# Fijamos la semilla aleatoria para poder repetir los experimentos
 seed!(1);
 
 numFolds = 10;
-
-# Parametros principales de la RNA y del proceso de entrenamiento
-topology = [4, 3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
-learningRate = 0.01; # Tasa de aprendizaje
-numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
-validationRatio = 0; # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
-maxEpochsVal = 6; # Numero de ciclos en los que si no se mejora el loss en el conjunto de validacion, se para el entrenamiento
-numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA para cada fold por el hecho de ser no determinístico el entrenamiento
-
-# Parametros del SVM
-kernel = "rbf";
-kernelDegree = 3;
-kernelGamma = 2;
-C=1;
-
-# Parametros del arbol de decision
-maxDepth = 4;
-
-# Parapetros de kNN
-numNeighbors = 3;
-
-dataset_name="datasets/faces.data"
-if (!isfile(dataset_name))
-    (inputs, targets) = getInputs("datasets");
-    println("Tamaños en la generación:")
-    println(size(inputs))
-    println(size(targets))
-    write_dataset(dataset_name,inputs,targets)
-end
-
-# Cargamos el dataset
-dataset = readdlm(dataset_name,',');
-
-# Preparamos las entradas y las salidas deseadas
-inputs = convert(Array{Float64,2}, dataset[:,1:6]);             #Array{Float64,2}
-#targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));   #Array{Bool,2}
-targets = convert(Array{Any,1},dataset[:,7]);
-# Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
-#normalizeMinMax!(inputs);
-
+#==
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
-modelHyperparameters["topology"] = topology;
-modelHyperparameters["learningRate"] = learningRate;
-modelHyperparameters["validationRatio"] = validationRatio;
-modelHyperparameters["numExecutions"] = numRepetitionsAANTraining;
-modelHyperparameters["maxEpochs"] = numMaxEpochs;
-modelHyperparameters["maxEpochsVal"] = maxEpochsVal;
-modelCrossValidation(:ANN, modelHyperparameters, inputs, targets, numFolds);
+modelHyperparameters["fstNeuron"] = 1;
+modelHyperparameters["maxNNxlayer"] = 10;
+testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds);
 
 # Entrenamos las SVM
 modelHyperparameters = Dict();
-modelHyperparameters["kernel"] = kernel;
-modelHyperparameters["kernelDegree"] = kernelDegree;
-modelHyperparameters["kernelGamma"] = kernelGamma;
-modelHyperparameters["C"] = C;
-modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
-
+testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);
+=#
 # Entrenamos los arboles de decision
-modelCrossValidation(:DecisionTree, Dict("maxDepth" => maxDepth), inputs, targets, numFolds);
+testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds);
 
 # Entrenamos los kNN
-modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
+#testingModels(:kNN, Dict(), inputs, targets, numFolds);
