@@ -4,13 +4,16 @@ include("modulos/models_cross_validation.jl")
 include("modulos/graphics.jl")
 
 
-function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topology::Array{Int64,1}, numFolds::Int64)
+function topology_test(inputs::Array{Float64,2}, targets::Array{Any,1}, topology::Array{Int64,1}, numFolds::Int64)
 
     learningRate = 0.01;
     numMaxEpochs = 1000;
     validationRatio = 0.2;
     maxEpochsVal = 30;
     numRepetitionsAANTraining = 50;
+
+    classes = unique(targets);
+    targets = oneHotEncoding(targets, classes);
 
     testAccuracies = Array{Float64,1}(undef, numFolds);
     testF1         = Array{Float64,1}(undef, numFolds);
@@ -63,57 +66,131 @@ function topology_test(inputs::Array{Float64,2}, targets::Array{Bool,2}, topolog
     return (topology, mean(testAccuracies), std(testAccuracies), mean(testF1), std(testF1))
 end;
 
-function rna_loop_1(inputs::Array{Float64,2}, targets::Array{Bool,2}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+function rna_loop_1(inputs::Array{Float64,2}, targets::Array{Any,1}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+    mean_acc = [];
+    sdev = [];
+    topologyarr = [];
     for i in stlynn:nnpplayer
         (topology, meanTestAccuracies, stdTestAccuracies,
-            meanTestF1, stdTestF1) = topology_test(inputs, targets, [i], numFolds)
+            _, _) = topology_test(inputs, targets, [i], numFolds)
+        push!(mean_acc,testAccuracies);
+        push!(sdev,testStd);
+        push!(topologyarr, string("[",i,"]"));
     end;
+    m = plot(topologyarr,mean_acc,title = "Accurracies",label = "Accurracy",);
+    xlabel!("Topology");
+    ylabel!("Precision");
+    stdd = plot(topologyarr,sdev,title = "Standard Deviation",label = "std",);
+    xlabel!("Topology");
+    ylabel!("%");
+    display(plot(m,stdd));
 end;
 
-function rna_loop_2(inputs::Array{Float64,2}, targets::Array{Bool,2}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+function rna_loop_2(inputs::Array{Float64,2}, targets::Array{Any,1}, nnpplayer::Int64, stlynn::Int64, numFolds::Int64)
+    mean_acc = [];
+    sdev = [];
+    topologyarr = [];
     for i in stlynn:nnpplayer
         for j in stlynn:nnpplayer
             (topology, meanTestAccuracies, stdTestAccuracies,
-                meanTestF1, stdTestF1) = topology_test(inputs, targets, [i,j], numFolds)
+                _, _) = topology_test(inputs, targets, [i,j], numFolds)
+            push!(mean_acc,testAccuracies);
+            push!(sdev,testStd);
+            push!(topologyarr, string("[",i,",",j,"]"));
         end;
     end;
+    m = plot(topologyarr,mean_acc,title = "Accurracies",label = "Accurracy",);
+    xlabel!("Topology");
+    ylabel!("Precision");
+    stdd = plot(topologyarr,sdev,title = "Standard Deviation",label = "std",);
+    xlabel!("Topology");
+    ylabel!("%");
+    display(plot(m,stdd));
 end;
+
+function testRNAs(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Dict, numFolds::Int64)
+    layers = parameters["layers"] = 1;
+    if (layers==0)
+        (_, testAccuracies, stdTestAccuracies, _, _) = topology_test(inputs,targets,[0])
+        println("Test accuracies for a topology of 0 hidden layers: " + string(testAccuracies))
+        println("Standard deviation for test accuracies for a topology of 0 hidden layers: " + string(testAccuracies))
+    elseif (layers==1)
+        rna_loop_1(inputs, targets, parameters["maxNNxlayer"], parameters["fstNeuron"], numFolds)
+    else (layers==2)
+        rna_loop_2(inputs, targets, parameters["maxNNxlayer"], parameters["fstNeuron"], numFolds)
+    end;
+end;
+
+function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Dict, numFolds::Int64)
+
+    if (parameters["kernel"]=="linear")
+        modelHyperparameters = Dict();
+        modelHyperparameters["kernel"] = parameters["kernel"];
+        modelHyperparameters["kernelDegree"] = 3;
+        modelHyperparameters["kernelGamma"] = 2;
+        modelHyperparameters["C"] = 1;
+        (testAccuracies, testStd, _, _) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
+        println("Test accuracies for a topology of 0 hidden layers: " + string(testAccuracies))
+        println("Standard deviation for test accuracies for a topology of 0 hidden layers: " + string(testAccuracies))
+
+    elseif (parameters["kernel"]=="poly")
+        mean_acc = [];
+        sdev = [];
+        for kernelGamma in 1:parameters["maxGamma"]
+            modelHyperparameters = Dict();
+            modelHyperparameters["kernel"] = parameters["kernel"];
+            modelHyperparameters["kernelDegree"] = parameters["kernelDegree"];
+            modelHyperparameters["kernelGamma"] = kernelGamma;
+            modelHyperparameters["C"] = 1;
+            (testAccuracies, testStd, _, _) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
+            push!(mean_acc,testAccuracies);
+            push!(sdev,testStd);
+            printAccStd(mean_acc, sdev, max_Neigh, "Kernel Gamma")
+        end;
+
+    else
+        mean_acc = [];
+        sdev = [];
+        for kernelGamma in 1:parameters["maxGamma"]
+            modelHyperparameters = Dict();
+            modelHyperparameters["kernel"] = "rbf";
+            modelHyperparameters["kernelDegree"] = parameters["kernelDegree"];
+            modelHyperparameters["kernelGamma"] = kernelGamma;
+            modelHyperparameters["C"] = 1;
+            (testAccuracies, testStd, _, _) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
+            push!(mean_acc,testAccuracies);
+            push!(sdev,testStd);
+        end;
+        printAccStd(mean_acc, sdev, max_Neigh, "Kernel Gamma")
+    end;
+
+end
 
 function testDecisionTree(inputs::Array{Float64,2}, targets::Array{Any,1}, maxDepth::Int64, numFolds::Int64)
     mean_acc = [];
     sdev = [];
-
     for depth in 1:maxDepth
         (testAccuracies, testStd, _, _) = modelCrossValidation(:DecisionTree, Dict("maxDepth" => depth), inputs, targets, numFolds);
         push!(mean_acc,testAccuracies);
         push!(sdev,testStd);
     end;
-
-    m = plot([1:maxDepth],mean_acc,title = "Accurracies",label = "Accurracy",);
-    xlabel!("maxDepth");
-    ylabel!("Precision");
-    stdd = plot([1:maxDepth],sdev,title = "Standard Deviation",label = "std",);
-    xlabel!("maxDepth");
-    ylabel!("%");
-    display(plot(m,stdd))
+    printAccStd(mean_acc, sdev, maxDepth, "maxDepth")
 end;
 
 function testKNN(inputs::Array{Float64,2}, targets::Array{Any,1}, max_Neigh::Int64, numFolds::Int64)
     mean_acc = [];
     sdev = [];
-
     for numNeighbors in 1:max_Neigh
         (testAccuracies, testStd, _, _) = modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
         push!(mean_acc,testAccuracies);
         push!(sdev,testStd);
     end;
-
     printAccStd(mean_acc, sdev, max_Neigh, "Number of Neighbors")
 end
 
 function testingModels(modelType::Symbol, parameters::Dict, inputs::Array{Float64,2}, targets::Array{Any,1}, numFolds::Int64)#, topology::Array{Int64,1})
     if modelType==:ANN
-        rna_loop_1(inputs,targets,parameters["maxNNxlayer"],parameters["fstNeuron"],numFolds);
+        testRNAs(inputs,targets,parameters,numFolds);
     elseif modelType==:SVM
         println("svm")
     elseif modelType==:DecisionTree
@@ -141,19 +218,26 @@ targets = convert(Array{Any,1},dataset[:,7]);
 seed!(1);
 
 numFolds = 10;
-#==
+
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
-modelHyperparameters["maxNNxlayer"] = 10;
+modelHyperparameters["maxNNxlayer"] = 2;
+modelHyperparameters["layers"] = 1;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds);
 
 # Entrenamos las SVM
-modelHyperparameters = Dict();
-testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);
-=#
+#modelHyperparameters = Dict();
+#testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);
+
 # Entrenamos los arboles de decision
 testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds);
 
-# Entrenamos los kNN
-#testingModels(:kNN, Dict(), inputs, targets, numFolds);
+# Entrenamos los arboles de decision
+testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds);
+
+modelHyperparameters = Dict();
+modelHyperparameters["kernel"] = 1;
+modelHyperparameters["kernelDegree"] = 2;
+modelHyperparameters["maxGamma"] = 1;
+testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);

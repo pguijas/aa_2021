@@ -27,4 +27,4 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, N::Int64, xlabe
     xlabel!(xlabel);
     ylabel!("%");
     display(plot(m,stdd));
-end
+end;
