@@ -2,6 +2,8 @@ include("modulos/datasets.jl")
 include("modulos/attributes_from_dataset.jl")
 include("modulos/models_cross_validation.jl")
 
+using Plots;
+
 seed!(1);
 
 dataset_name="datasets/faces.data"
