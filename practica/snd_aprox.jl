@@ -1,5 +1,7 @@
-using FileIO
-using Images
+using FileIO;
+using Images;
+
+include("../modulos/attributes_from_dataset.jl")
 
 function visualize1(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
 
@@ -176,20 +178,30 @@ function visualize_hector(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64
     save("/home/hector/Downloads/char_hec.jpeg", img)
 end;
 
-function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2}}
+function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
+    # devolvemos un array de imágenes
+    array_of_images = [];
+    # tamaños de la imagen para recortes
     (h, w) = size(image);
-
+    # empieza la extracción de características
     left_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20 * 9)];
+    push!(array_of_images, left_eye);
     right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
+    push!(array_of_images, right_eye);
     left_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20 * 7)];
+    push!(array_of_images, left_checkb);
     right_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 19)];
+    push!(array_of_images, right_checkb);
     nose = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 13)];
+    push!(array_of_images, nose);
     mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
-
+    push!(array_of_images, mouth);
+    # visualizamos los recortes
     visualize_hector(img, h, w);
 
-    return (left_eye, right_eye, left_checkb, right_checkb, nose, mouth);
+    # ya la devolvemos el formato de Float64
+    return imageToColorArray.(array_of_images);
 end;
 
 #img = load("../datasets/cara_positivo/3.jpeg");
@@ -213,14 +225,16 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature3)
 #display(feature4)
 
-(feature1, feature2, feature3, feature4, feature5, feature6) = face_features_hector(img);
-display(feature1)
-display(feature2)
-display(feature3)
-display(feature4)
-display(feature5)
-display(feature6)
-
+array = face_features_hector(img);
+inputs = getAttributesFromImage(imageToColorArray(img));
+@show(inputs);
+println()
+for image = array
+    for 𝑋 = getAttributesFromImage(image)
+        push!(inputs, 𝑋);
+    end;
+end;
+@show(inputs);
 #=
 
 Idea de representación en el dataset para la rna:

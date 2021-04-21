@@ -32,7 +32,6 @@ function loadFolderImages(folderName::String)
             # Leemos la imagen
             image = load(string(folderName, "/", fileName));
             # Comprobar que el archivo cargado sea una imagen en color
-            #Rgbx Vete a tomar por culo
             if (typeof(image)==Array{RGBX{Normed{UInt8,8}},2})
                 image=convert(Array{RGB{Normed{UInt8,8}},2},image)
             end
