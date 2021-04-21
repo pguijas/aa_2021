@@ -72,8 +72,8 @@ end
 
 # =============================================================================
 
-# Funcion que obtiene una matriz Nx9, donde N es el numero de elementos
-# (positivos + negativos) y 9 es el numero de columnas (varianza, media y
+# Funcion que obtiene una matriz Nx6, donde N es el numero de elementos
+# (positivos + negativos) y 6 es el numero de columnas (varianza, media y
 # desviacion tipica) para cada canal RGB y un vector de targets
 function getInputs(path)
     # Obtenemos todas las fotos clasificadas en positivas y negativas

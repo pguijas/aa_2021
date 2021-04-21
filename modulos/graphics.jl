@@ -16,7 +16,7 @@ function print_train_results(
     xlabel!("Epoch");
     ylabel!("% Accuracies");
     display(plot(losses,accuracy));
-end
+end;
 
 
 function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, N::Int64, xlabel::String)
@@ -25,6 +25,16 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, N::Int64, xlabe
     ylabel!("Precision");
     stdd = plot([1:N],sdev,title = "Standard Deviation",label = "std",);
     xlabel!(xlabel);
+    ylabel!("%");
+    display(plot(m,stdd));
+end;
+
+function printAccStdRNA(mean_acc::Array{Any,1}, sdev::Array{Any,1}, topologyarr::Array{Any,1})
+    m = plot(topologyarr,mean_acc,title = "Accurracies",label = "Accurracy",);
+    xlabel!("Topology");
+    ylabel!("Precision");
+    stdd = plot(topologyarr,sdev,title = "Standard Deviation",label = "std",);
+    xlabel!("Topology");
     ylabel!("%");
     display(plot(m,stdd));
 end;

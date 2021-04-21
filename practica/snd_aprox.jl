@@ -122,18 +122,22 @@ function visualize3(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
     save("/home/hector/Downloads/char_3.jpeg", img)
 end;
 
-function face_features_pedro(image::Array{RGB{Normed{UInt8,8}},2})::Tuple{Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2},Array{RGB{Normed{UInt8,8}},2}}
+function face_features_pedro(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
+    array_of_images = [];
     (h, w) = size(image);
 
     left_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20 * 9)];
+    push!(array_of_images, left_eye);
     right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
+    push!(array_of_images, right_eye);
     checkbones_and_nose = image[(h ÷ 20 * 6):(h ÷ 20 * 11), (w ÷ 20 * 2):(w ÷ 20 * 18)];
+    push!(array_of_images, checkbones_and_nose);
     mouth_and_chin = image[(h ÷ 20 * 12):(h), (w ÷ 20 * 4):(w ÷ 20 * 16)];
-
+    push!(array_of_images, mouth_and_chin);
     visualize3(img, h, w);
 
-    return (left_eye, right_eye, checkbones_and_nose, mouth_and_chin);
+    return imageToColorArray.(array_of_images);
 end;
 
 function visualize_hector(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
@@ -225,7 +229,8 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature3)
 #display(feature4)
 
-array = face_features_hector(img);
+
+array = face_features_hector(img);#face_features_pedro(img);
 inputs = getAttributesFromImage(imageToColorArray(img));
 @show(inputs);
 println()
@@ -235,19 +240,13 @@ for image = array
     end;
 end;
 @show(inputs);
+
+# podemos hacer varias funciones de loadFolderImages o añadir símbolos a la
+# funcion del estilo :Char1, :Char2A, :Char2B, etc.
+
+
 #=
-
-Idea de representación en el dataset para la rna:
-
-img = Gray.(img)
-
-Nº    μ(Ojo izq)  σ(Ojo izq)  μ(Ojo der)  ... σ(boca)     Cara/No_Cara
-1     0.xxxxxx    0.xxxxxx    0.xxxxxx    ... 0.xxxx      Si/No
-...
-238   0.xxxxxx    0.xxxxxx    0.xxxxxx    ... 0.xxxx      Si/No
-
-
-o así
+Representación en el dataset de los inputs:
 
 Nº    μ(R(Ojo izq)) σ(R(Ojo izq))   μ(G(Ojo izq))   σ(G(Ojo izq))   ...     Cara/No_Cara
 1     0.xxxxxx      0.xxxxxx        0.xxxxxx        0.xxxx          ...     Si/No

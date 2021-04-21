@@ -20,21 +20,21 @@ seed!(1);
 numFolds = 10;
 
 # Entrenamos knn
-testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds);
+#testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds);
 
 # Entrenamos los arboles de decision
-testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds);
+#testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds);
 
 # Entrenamos svm
-modelHyperparameters = Dict();
-modelHyperparameters["kernel"] = "rbf";
-modelHyperparameters["kernelDegree"] = 2;
-modelHyperparameters["maxGamma"] = 20;
-testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);
+#modelHyperparameters = Dict();
+#modelHyperparameters["kernel"] = "rbf";
+#modelHyperparameters["kernelDegree"] = 2;
+#modelHyperparameters["maxGamma"] = 20;
+#testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds);
 
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
 modelHyperparameters["maxNNxlayer"] = 2;
 modelHyperparameters["layers"] = 1;
-testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds);
+testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds, :AccStd);
