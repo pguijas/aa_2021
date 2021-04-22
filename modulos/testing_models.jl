@@ -161,7 +161,7 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
                 modelHyperparameters["kernelDegree"] = parameters["kernelDegree"];
                 modelHyperparameters["kernelGamma"] = kernelGamma;
                 modelHyperparameters["C"] = 1;
-                (testAccuracies, testStd, _, _) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
+                (testAccuracies, testStd, testF1, F1Std) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
                 push!(mean_acc,testAccuracies);
                 push!(sdev_acc,testStd);
                 push!(mean_f1,testF1);

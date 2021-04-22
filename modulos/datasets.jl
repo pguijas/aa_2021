@@ -8,7 +8,7 @@
 #       -normalizeZeroMean!
 #   - holdOut (sobrecargada 2 y 3 params)
 #   - validacion cruzada(añadir en un futuro) -> FALTAS TU
-#   - classifyOutputs 
+#   - classifyOutputs
 # =============================================================================
 
 using FileIO;
@@ -34,6 +34,7 @@ function oneHotEncoding(feature::Array{Any,1}, classes::Array{Any,1})
     # Primero se comprueba que todos los elementos del vector esten en el vector de clases (linea adaptada del final de la practica 4)
     @assert(all([in(value, classes) for value in feature]));
     numClasses = length(classes);
+    
     @assert(numClasses>1)
     if (numClasses==2)
         # Si solo hay dos clases, se devuelve una matriz con una columna
@@ -88,7 +89,7 @@ function normalizeMinMax!(dataset::Array{Float64,2}, normalizationParameters::Tu
         dataset[:, vec(min.==max)] .= 0;
     else
         dataset[vec(min.==max), :] .= 0;
-    end
+    end;
 end;
 
 #

@@ -18,8 +18,8 @@ numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA pa
 
 # Parametros del SVM
 kernel = "rbf";
-kernelDegree = 15;
-kernelGamma = 2;
+kernelDegree = 2;
+kernelGamma = 15;
 C=1;
 
 # Parametros del arbol de decision
@@ -31,7 +31,7 @@ numNeighbors = 5;
 #Si no está generado el dataset pues lo creamos
 dataset_name="datasets/faces.data"
 if (!isfile(dataset_name))
-    (inputs, targets) = getInputs("../AA_DATASET");
+    (inputs, targets) = getInputs("datasets");
     println("Tamaños en la generación:")
     println(size(inputs))
     println(size(targets))
@@ -47,7 +47,7 @@ targets = convert(Array{Any,1},dataset[:,7]);                   #Array{Bool,2}
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);
-
+#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["topology"] = topology;
@@ -71,3 +71,4 @@ modelCrossValidation(:DecisionTree, Dict("maxDepth" => maxDepth), inputs, target
 
 # Entrenamos los kNN
 modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
+=#

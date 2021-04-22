@@ -58,7 +58,7 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
             elseif modelType==:kNN
                 model = KNeighborsClassifier(modelHyperparameters["numNeighbors"]);
             end;
-
+            
             # Entrenamos el modelo con el conjunto de entrenamiento
             model = fit!(model, trainingInputs, trainingTargets);
 
