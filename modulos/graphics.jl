@@ -38,3 +38,11 @@ function printAccStdRNA(mean_acc::Array{Any,1}, sdev::Array{Any,1}, topologyarr:
     ylabel!("%");
     display(plot(m,stdd));
 end;
+
+
+#=
+sudo apt-get install python3-matplotlib
+
+Pkg.add("PyPlot") || Pkg.build("PyPlot")
+
+=#

@@ -12,7 +12,7 @@ seed!(33);
 #nº elementos
 
 # Parametros principales de la RNA y del proceso de entrenamiento
-topology = [4, 3];              # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
+topology = [4];              # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01;            # Tasa de aprendizaje
 numMaxEpochs = 1000;            # Numero maximo de ciclos de entrenamiento
 numFolds = 10;
@@ -34,8 +34,8 @@ end
 dataset = readdlm(dataset_name,',');
 
 # Preparamos las entradas y las salidas deseadas
-inputs = convert(Array{Float64,2}, dataset[:,1:6]);             #Array{Float64,2}
-targets = oneHotEncoding(convert(Array{Any,1},dataset[:,7]));   #Array{Bool,2}
+inputs = convert(Array{Float64,2}, dataset[:,1:42]);             #Array{Float64,2}
+targets = oneHotEncoding(convert(Array{Any,1},dataset[:,43]));   #Array{Bool,2}
 
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);

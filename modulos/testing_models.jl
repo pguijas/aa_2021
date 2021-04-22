@@ -142,18 +142,23 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
         mean_f1 = [];
         sdev_f1 = [];
         if (parameters["kernel"]=="poly")
-            for kernelGamma in 1:parameters["maxGamma"]
-                modelHyperparameters = Dict();
-                modelHyperparameters["kernel"] = parameters["kernel"];
-                modelHyperparameters["kernelDegree"] = parameters["kernelDegree"];
-                modelHyperparameters["kernelGamma"] = kernelGamma;
-                modelHyperparameters["C"] = 1;
-                (testAccuracies, testStd, _, _) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
-                push!(mean_acc,testAccuracies);
-                push!(sdev_acc,testStd);
-                push!(mean_f1,testF1);
-                push!(sdev_f1,F1Std);
+            for degree in 1:parameters["kernelDegree"]
+                for kernelGamma in 1:parameters["maxGamma"]
+                    modelHyperparameters = Dict();
+                    modelHyperparameters["kernel"] = parameters["kernel"];
+                    modelHyperparameters["kernelDegree"] = degree;
+                    modelHyperparameters["kernelGamma"] = kernelGamma;
+                    modelHyperparameters["C"] = 1;
+                    (testAccuracies, testStd, testF1, F1Std) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
+                    push!(mean_acc,testAccuracies);
+                    push!(sdev_acc,testStd);
+                    push!(mean_f1,testF1);
+                    push!(sdev_f1,F1Std);
+                end;
             end;
+            pyplot();
+            plot(1:parameters["kernelDegree"],1:parameters["maxGamma"],mean_acc,st=:surface, xlabel = "kernelDegree", ylabel = "maxGamma", zlabel = "Accurracy",camera=(-45,45))
+
         else
             for kernelGamma in 1:parameters["maxGamma"]
                 modelHyperparameters = Dict();
@@ -168,7 +173,7 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
                 push!(sdev_f1,F1Std);
             end;
         end;
-        printAccStd(mean_acc, sdev_acc, parameters["maxGamma"], "Kernel Gamma");
+        #printAccStd(mean_acc, sdev_acc, parameters["maxGamma"], "Kernel Gamma");
     end;
 
 end;

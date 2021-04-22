@@ -107,16 +107,16 @@ function visualize3(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
     img[(h ÷ 3):(h ÷ 3),  (w ÷ 20 * 11):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya abajo
 
     # nariz y pómulos
-    img[(h ÷ 20 * 6):(h ÷ 20 * 11), (w ÷ 20 * 2):(w ÷ 20 * 2)]  .= RGB(0,1,0); #raya derecha
-    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 2):(w ÷ 20 * 18)] .= RGB(0,1,0); #raya arriba
-    img[(h ÷ 20 * 6):(h ÷ 20 * 11), (w ÷ 20 * 18):(w ÷ 20 * 18)].= RGB(0,1,0); #raya derecha
-    img[(h ÷ 20 * 11):(h ÷ 20 * 11),(w ÷ 20 * 2):(w ÷ 20 * 18)] .= RGB(0,1,0); #raya abajo
+    img[(h ÷ 20 * 6):(h ÷ 20 * 10), (w ÷ 20):(w ÷ 20)]  .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 10), (w ÷ 20 * 19):(w ÷ 20 * 19)].= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 10):(h ÷ 20 * 10),(w ÷ 20):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya abajo
 
     # boca y barbilla
-    img[(h ÷ 20 * 12):(h),          (w ÷ 20 * 4):(w ÷ 20 * 4)]  .= RGB(0,0,1); #raya derecha
-    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya arriba
-    img[(h ÷ 20 * 12):(h),          (w ÷ 20 * 16):(w ÷ 20 * 16)].= RGB(0,0,1); #raya derecha
-    img[(h):(h),                    (w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya abajo
+    #img[(h ÷ 20 * 12):(h),          (w ÷ 20 * 4):(w ÷ 20 * 4)]  .= RGB(0,0,1); #raya derecha
+    #img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya arriba
+    #img[(h ÷ 20 * 12):(h),          (w ÷ 20 * 16):(w ÷ 20 * 16)].= RGB(0,0,1); #raya derecha
+    #img[(h):(h),                    (w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya abajo
 
     display(img);
     save("/home/hector/Downloads/char_3.jpeg", img)
@@ -131,10 +131,10 @@ function face_features_pedro(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{
     push!(array_of_images, left_eye);
     right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
     push!(array_of_images, right_eye);
-    checkbones_and_nose = image[(h ÷ 20 * 6):(h ÷ 20 * 11), (w ÷ 20 * 2):(w ÷ 20 * 18)];
+    checkbones_and_nose = image[(h ÷ 20 * 6):(h ÷ 20 * 10), (w ÷ 20):(w ÷ 20 * 19)];
     push!(array_of_images, checkbones_and_nose);
-    mouth_and_chin = image[(h ÷ 20 * 12):(h), (w ÷ 20 * 4):(w ÷ 20 * 16)];
-    push!(array_of_images, mouth_and_chin);
+    #mouth_and_chin = image[(h ÷ 20 * 12):(h), (w ÷ 20 * 4):(w ÷ 20 * 16)];
+    #push!(array_of_images, mouth_and_chin);
     visualize3(img, h, w);
 
     return imageToColorArray.(array_of_images);
@@ -223,13 +223,12 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature4)
 #display(feature5)
 
-#(feature1, feature2, feature3, feature4) = face_features_pedro(img);
-#display(feature1)
-#display(feature2)
-#display(feature3)
-#display(feature4)
+array = face_features_pedro(img);
+display(array[1])
+display(array[2])
+display(array[3])
 
-
+#=
 array = face_features_hector(img);#face_features_pedro(img);
 inputs = getAttributesFromImage(imageToColorArray(img));
 @show(inputs);
@@ -240,7 +239,7 @@ for image = array
     end;
 end;
 @show(inputs);
-
+=#
 # podemos hacer varias funciones de loadFolderImages o añadir símbolos a la
 # funcion del estilo :Char1, :Char2A, :Char2B, etc.
 

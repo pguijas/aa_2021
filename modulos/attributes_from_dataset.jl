@@ -95,6 +95,7 @@ function getInputs(path::String; cols::Int64=42, v2::Bool=true)
         inputs[i,:] = v2 ? getAttrFromImgv2(foto) : getAttributesFromImage(foto);
     end;
 
+
     # Generamos la segunda parte de la matriz de inputs con los elementos
     # que son negativos
     for i in (size(positiveDataset,1) + 1):rows
