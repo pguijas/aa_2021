@@ -58,7 +58,7 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
             elseif modelType==:kNN
                 model = KNeighborsClassifier(modelHyperparameters["numNeighbors"]);
             end;
-            
+
             # Entrenamos el modelo con el conjunto de entrenamiento
             model = fit!(model, trainingInputs, trainingTargets);
 
@@ -128,10 +128,10 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
         testAccuracies[numFold] = acc;
         testF1[numFold]         = F1;
 
-        println("Results in test in fold ", numFold, "/", numFolds, ": accuracy: ", 100*testAccuracies[numFold], " %, F1: ", 100*testF1[numFold], " %");
+        #println("Results in test in fold ", numFold, "/", numFolds, ": accuracy: ", 100*testAccuracies[numFold], " %, F1: ", 100*testF1[numFold], " %");
 
     end; # for numFold in 1:numFolds
-
+    println()
     println(modelType, ": Average test accuracy on a ", numFolds, "-fold crossvalidation: ", 100*mean(testAccuracies), ", with a standard deviation of ", 100*std(testAccuracies));
     println(modelType, ": Average test F1 on a ", numFolds, "-fold crossvalidation: ", 100*mean(testF1), ", with a standard deviation of ", 100*std(testF1));
 

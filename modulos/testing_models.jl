@@ -120,15 +120,15 @@ function testRNAs(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::D
         else
             println("Test para arquitecturas de 3 capas o superiores no implementados.");
         end;
-        printAccStdRNA(mean_acc, sdev_acc, topologyarr);
+        printAccStdRNA(mean_acc, sdev_acc, mean_f1, sdev_f1, topologyarr, rep);
     end;
 end;
 
 function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Dict, numFolds::Int64, rep::Symbol)
-
-    if (parameters["kernel"]=="linear")
+    kernel = parameters["kernel"];
+    if (kernel=="linear")
         modelHyperparameters = Dict();
-        modelHyperparameters["kernel"] = parameters["kernel"];
+        modelHyperparameters["kernel"] = kernel;
         modelHyperparameters["kernelDegree"] = 3;
         modelHyperparameters["kernelGamma"] = 2;
         modelHyperparameters["C"] = 1;
@@ -141,30 +141,51 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
         sdev_acc = [];
         mean_f1 = [];
         sdev_f1 = [];
-        if (parameters["kernel"]=="poly")
-            for degree in 1:parameters["kernelDegree"]
-                for kernelGamma in 1:parameters["maxGamma"]
+        kernel° = parameters["kernelDegree"];
+        max_γ = parameters["maxGamma"];
+        plot3d = rep==:Plot3D;
+        if (kernel=="poly")
+            for degree in 1:kernel°
+                if !plot3d
+                    local_mean_acc = []
+                    local_sdev_acc = []
+                    local_mean_f1 = []
+                    local_sdev_f1 = []
+                end;
+                for γ in 1:max_γ
                     modelHyperparameters = Dict();
-                    modelHyperparameters["kernel"] = parameters["kernel"];
+                    modelHyperparameters["kernel"] = kernel;
                     modelHyperparameters["kernelDegree"] = degree;
-                    modelHyperparameters["kernelGamma"] = kernelGamma;
+                    modelHyperparameters["kernelGamma"] = γ;
                     modelHyperparameters["C"] = 1;
                     (testAccuracies, testStd, testF1, F1Std) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
-                    push!(mean_acc,testAccuracies);
-                    push!(sdev_acc,testStd);
-                    push!(mean_f1,testF1);
-                    push!(sdev_f1,F1Std);
+                    if plot3d
+                        push!(mean_acc,testAccuracies);
+                        push!(sdev_acc,testStd);
+                        push!(mean_f1,testF1);
+                        push!(sdev_f1,F1Std);
+                    else
+                        push!(local_mean_acc,testAccuracies);
+                        push!(local_sdev_acc,testStd);
+                        push!(local_mean_f1,testF1);
+                        push!(local_sdev_f1,F1Std);
+                    end;
+                end;
+                if !plot3d
+                    printAccStd(local_mean_acc, local_sdev_acc, local_mean_f1, local_sdev_f1, max_γ, "Kernel γ", rep);
                 end;
             end;
-            pyplot();
-            plot(1:parameters["kernelDegree"],1:parameters["maxGamma"],mean_acc,st=:surface, xlabel = "kernelDegree", ylabel = "maxGamma", zlabel = "Accurracy",camera=(-45,45))
+            if plot3d
+                pyplot();
+                plot(1:kernel°, 1:max_γ, mean_acc, st=:surface, xlabel = "Kernel°", ylabel = "Kernel γ", camera=(22,30));
+            end;
 
         else
-            for kernelGamma in 1:parameters["maxGamma"]
+            for γ in 1:max_γ
                 modelHyperparameters = Dict();
                 modelHyperparameters["kernel"] = "rbf";
-                modelHyperparameters["kernelDegree"] = parameters["kernelDegree"];
-                modelHyperparameters["kernelGamma"] = kernelGamma;
+                modelHyperparameters["kernelDegree"] = kernel°;
+                modelHyperparameters["kernelGamma"] = γ;
                 modelHyperparameters["C"] = 1;
                 (testAccuracies, testStd, testF1, F1Std) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
                 push!(mean_acc,testAccuracies);
@@ -172,8 +193,8 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
                 push!(mean_f1,testF1);
                 push!(sdev_f1,F1Std);
             end;
+            printAccStd(mean_acc, sdev_acc, mean_f1, sdev_f1, max_γ, "Kernel γ", rep);
         end;
-        #printAccStd(mean_acc, sdev_acc, parameters["maxGamma"], "Kernel Gamma");
     end;
 
 end;
@@ -190,7 +211,7 @@ function testDecisionTree(inputs::Array{Float64,2}, targets::Array{Any,1}, maxDe
         push!(mean_f1,testF1);
         push!(sdev_f1,F1Std);
     end;
-    printAccStd(mean_acc, sdev_acc, maxDepth, "maxDepth")
+    printAccStd(mean_acc, sdev_acc, mean_f1, sdev_f1, maxDepth, "maxDepth", rep);
 end;
 
 function testKNN(inputs::Array{Float64,2}, targets::Array{Any,1}, max_Neigh::Int64, numFolds::Int64, rep::Symbol)
@@ -205,10 +226,10 @@ function testKNN(inputs::Array{Float64,2}, targets::Array{Any,1}, max_Neigh::Int
         push!(mean_f1,testF1);
         push!(sdev_f1,F1Std);
     end;
-    printAccStd(mean_acc, sdev_acc, max_Neigh, "Number of Neighbors")
+    printAccStd(mean_acc, sdev_acc, mean_f1, sdev_f1, max_Neigh, "Number of Neighbors", rep);
 end;
 
-function testingModels(modelType::Symbol, parameters::Dict, inputs::Array{Float64,2}, targets::Array{Any,1}, numFolds::Int64, rep::Symbol)
+function testingModels(modelType::Symbol, parameters::Dict, inputs::Array{Float64,2}, targets::Array{Any,1}, numFolds::Int64; rep::Symbol=:All)
     if modelType==:ANN
         testRNAs(inputs,targets,parameters,numFolds,rep);
     elseif modelType==:SVM
