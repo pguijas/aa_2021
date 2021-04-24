@@ -60,7 +60,7 @@ maxDepth = 4;
 numNeighbors = 5;
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);
-#=
+
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["topology"] = topology;
@@ -84,4 +84,3 @@ modelCrossValidation(:DecisionTree, Dict("maxDepth" => maxDepth), inputs, target
 
 # Entrenamos los kNN
 modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
-=#

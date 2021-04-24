@@ -21,14 +21,14 @@ hay tres extracciones
 =#
 extraction = :A21;
 dataset_name="datasets/faces.data";
-change = true;
+change = false;
 if extraction==:A1
     x = 6;
     y = 7;
 elseif extraction==:A21
     x = 42;
     y = 43;
-elseif extraction==:A22
+elseif (extraction==:A22 || extraction==:A23)
     x = 36;
     y = 37;
 end;
@@ -61,11 +61,11 @@ testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
-
 =#
+
 # Entrenamos svm
 modelHyperparameters = Dict();
-modelHyperparameters["kernel"] = "rbf";
+modelHyperparameters["kernel"] = "linear";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 20;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
