@@ -208,6 +208,74 @@ function face_features_hector(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array
     return imageToColorArray.(array_of_images);
 end;
 
+function visualize_ff2(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
+
+    # ojo y ceja izq
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20)]         .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20):(h ÷ 20),(w ÷ 20):(w ÷ 20 * 9)]     .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 9):(w ÷ 20 * 9)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 3):(h ÷ 3),  (w ÷ 20):(w ÷ 20 * 9)]     .= RGB(1,0,0); #raya abajo
+
+    # ojo y ceja der
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 11)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20):(h ÷ 20),(w ÷ 20 * 11):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 19):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 3):(h ÷ 3),  (w ÷ 20 * 11):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya abajo
+
+    # pómulo izq
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20)]         .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20):(w ÷ 20 * 6)]     .= RGB(0,1,0); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 6):(w ÷ 20 * 6)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20):(w ÷ 20 * 6)]     .= RGB(0,1,0); #raya abajo
+
+    # pómulo der
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 14):(w ÷ 20 * 14)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 14):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 19):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 14):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya abajo
+
+    # nariz
+    #img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 7)]   .= RGB(0,0,1); #raya derecha
+    #img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya arriba
+    #img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 13)] .= RGB(0,0,1); #raya derecha
+    #img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya abajo
+
+    # boca
+    img[(h ÷ 20 * 10):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 4)]  .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 10):(h ÷ 20 * 10),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya arriba
+    img[(h ÷ 20 * 10):(h ÷ 20 * 16),(w ÷ 20 * 16):(w ÷ 20 * 16)].= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 16):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya abajo
+
+    display(img);
+    save("/home/hector/Downloads/char_hec.jpeg", img)
+end;
+
+function face_features_2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
+
+    # devolvemos un array de imágenes
+    array_of_images = [];
+    # tamaños de la imagen para recortes
+    (h, w) = size(image);
+    # empieza la extracción de características
+    left_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20 * 9)];
+    push!(array_of_images, left_eye);
+    right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
+    push!(array_of_images, right_eye);
+    left_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20 * 7)];
+    push!(array_of_images, left_checkb);
+    right_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 19)];
+    push!(array_of_images, right_checkb);
+    #nose = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 13)];
+    #push!(array_of_images, nose);
+    mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
+    push!(array_of_images, mouth);
+    # visualizamos los recortes
+    visualize_ff2(img, h, w);
+
+    # ya la devolvemos el formato de Float64
+    return imageToColorArray.(array_of_images);
+end;
+
 #img = load("../datasets/cara_positivo/3.jpeg");
 img = load("/home/hector/Downloads/ex1.jpeg");
 img = convert(Array{RGB{Normed{UInt8,8}},2},img);
@@ -223,7 +291,7 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature4)
 #display(feature5)
 
-array = face_features_pedro(img);
+array = face_features_2(img);
 display(array[1])
 display(array[2])
 display(array[3])
