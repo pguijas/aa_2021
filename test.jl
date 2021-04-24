@@ -37,20 +37,26 @@ testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:
 testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
 =#
 
+#=
 # Entrenamos svm
 modelHyperparameters = Dict();
 modelHyperparameters["kernel"] = "poly";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 20;
-testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:AccF1);
-#=
-=#
+testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:Plot3D);
 
-#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
-modelHyperparameters["fstNeuron"] = 0;
+modelHyperparameters["fstNeuron"] = 1;
 modelHyperparameters["maxNNxlayer"] = 16;
 modelHyperparameters["layers"] = 1;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
+=#
+
+modelHyperparameters = Dict();
+modelHyperparameters["fstNeuron"] = 1;
+modelHyperparameters["maxNNxlayer"] = 8;
+modelHyperparameters["layers"] = 2;
+testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
+#=
 =#

@@ -26,7 +26,6 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Array{
         ylabel!("Precision");
         stdd = plot([1:N],[sdev sdev_f1],title = "Standard Deviation",label = ["Accurracies" "F1-Score"]);
         xlabel!(xlabel);
-        #ylabel!("%");
         display(plot(m,stdd));
     elseif rep==:AccStd
         m = plot([1:N],mean_acc,title = "Mean Values",label = "Accurracies");
@@ -34,7 +33,6 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Array{
         ylabel!("Precision");
         stdd = plot([1:N],sdev,title = "Standard Deviation",label = "Standard Deviation");
         xlabel!(xlabel);
-        #ylabel!("%");
         display(plot(m,stdd));
     elseif rep==:F1Std
         m = plot([1:N],mean_f1,title = "Mean Values",label = "F1-Score");
@@ -42,7 +40,6 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Array{
         ylabel!("Precision");
         stdd = plot([1:N],sdev_f1,title = "Standard Deviation",label = "Standard Deviation");
         xlabel!(xlabel);
-        #ylabel!("%");
         display(plot(m,stdd));
     elseif rep==:AccF1
         m = plot([1:N],[mean_acc mean_f1],title = "Mean Values",label = ["Accurracies" "F1-Score"]);
@@ -53,11 +50,31 @@ function printAccStd(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Array{
 end;
 
 function printAccStdRNA(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Array{Any,1}, sdev_f1::Array{Any,1}, topologyarr::Array{Any,1}, rep::Symbol)
-    m = plot(topologyarr,mean_acc,title = "Accurracies",label = "Accurracy",);
-    xlabel!("Topology");
-    ylabel!("Precision");
-    stdd = plot(topologyarr,sdev,title = "Standard Deviation",label = "std",);
-    xlabel!("Topology");
-    #ylabel!("%");
-    display(plot(m,stdd));
+    if rep==:All
+        m = plot(topologyarr,[mean_acc mean_f1],title = "Mean Values",label = ["Accurracies" "F1-Score"]);
+        xlabel!("Topology");
+        ylabel!("Precision");
+        stdd = plot(topologyarr,[sdev sdev_f1],title = "Standard Deviation",label = ["Accurracies" "F1-Score"]);
+        xlabel!("Topology");
+        display(plot(m,stdd));
+    elseif rep==:AccStd
+        m = plot(topologyarr,mean_acc,title = "Mean Values",label = "Accurracies");
+        xlabel!("Topology");
+        ylabel!("Precision");
+        stdd = plot(topologyarr,sdev,title = "Standard Deviation",label = "Standard Deviation");
+        xlabel!("Topology");
+        display(plot(m,stdd));
+    elseif rep==:F1Std
+        m = plot(topologyarr,mean_f1,title = "Mean Values",label = "F1-Score");
+        xlabel!("Topology");
+        ylabel!("Precision");
+        stdd = plot(topologyarr,sdev_f1,title = "Standard Deviation",label = "Standard Deviation");
+        xlabel!("Topology");
+        display(plot(m,stdd));
+    elseif rep==:AccF1
+        m = plot(topologyarr,[mean_acc mean_f1],title = "Mean Values",label = ["Accurracies" "F1-Score"]);
+        xlabel!("Topology");
+        ylabel!("Precision");
+        display(m);
+    end;
 end;
