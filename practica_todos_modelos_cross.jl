@@ -21,7 +21,7 @@ hay tres extracciones
 =#
 extraction = :A21;
 dataset_name="datasets/faces.data";
-change = true;
+change = false;
 if extraction==:A1
     x = 6;
     y = 7;
