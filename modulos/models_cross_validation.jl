@@ -38,7 +38,7 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
     # En este caso, solo voy a usar precision y F1, en otro problema podrían ser distintas
     testAccuracies = Array{Float64,1}(undef, numFolds);
     testF1         = Array{Float64,1}(undef, numFolds);
-
+    
     # Para cada fold, entrenamos
     for numFold in 1:numFolds
 

@@ -64,20 +64,20 @@ testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; 
 =#
 
 # Entrenamos svm
+#=
 modelHyperparameters = Dict();
 modelHyperparameters["kernel"] = "linear";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 20;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 
-#=
+=#
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
 modelHyperparameters["maxNNxlayer"] = 16;
 modelHyperparameters["layers"] = 1;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-=#
 
 #=
 modelHyperparameters = Dict();

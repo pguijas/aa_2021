@@ -4,7 +4,7 @@
 #   - confusionMatrix
 #   - printConfusionMatrix
 #
-# Este módulo solo trabaja con booleanos, a excepción de accuracy que lo necesita la 
+# Este módulo solo trabaja con booleanos, a excepción de accuracy que lo necesita la
 # rna para su entrenamientos
 #
 # =============================================================================
@@ -68,7 +68,7 @@ function accuracy(outputs::Array{Float64,2}, targets::Array{Bool,2}; dataInRows:
             return accuracy(outputs, targets; dataInRows=false);
         end;
     end;
-end;    
+end;
 
 # Añado estas funciones porque las RR.NN.AA. dan la salida como matrices de valores Float32 en lugar de Float64
 # Con estas funciones se pueden usar indistintamente matrices de Float32 o Float64
@@ -241,3 +241,10 @@ end;
 printConfusionMatrix(outputs::Array{Float64,2}, targets::Array{Bool,2}; weighted::Bool=true) =  printConfusionMatrix(classifyOutputs(outputs), targets; weighted=weighted)
 printConfusionMatrix(outputs::Array{Float32,2}, targets::Array{Bool,2}; weighted::Bool=true) = printConfusionMatrix(convert(Array{Float64,2}, outputs), targets; weighted=weighted);
 
+function printConfusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
+    # Comprobamos que todas las clases de salida esten dentro de las clases de las salidas deseadas
+    @assert(all([in(output, unique(targets)) for output in outputs]));
+    classes = unique(targets);
+    # Es importante calcular el vector de clases primero y pasarlo como argumento a las 2 llamadas a oneHotEncoding para que el orden de las clases sea el mismo en ambas matrices
+    printConfusionMatrix(oneHotEncoding(outputs, classes), oneHotEncoding(targets, classes); weighted=weighted);
+end;
