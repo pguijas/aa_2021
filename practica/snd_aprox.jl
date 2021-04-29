@@ -24,7 +24,7 @@ function visualize1(img::Array{RGB{Normed{UInt8,8}},2}, h::Int64, w::Int64)
     img[(h):(h),                    (w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(0,0,1); #raya abajo
 
     display(img);
-    save("/home/hector/Downloads/char_1.jpeg", img)
+    save("/home/hector/Downloads/im3.jpeg", img)
 end;
 
 # una función que nos devuelva partes de una img
@@ -277,7 +277,7 @@ function face_features_2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Floa
 end;
 
 #img = load("../datasets/cara_positivo/3.jpeg");
-img = load("/home/hector/Downloads/ex1.jpeg");
+img = load("/home/hector/Downloads/82.jpeg");
 img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #(feature1, feature2, feature3) = face_features(img);
 #display(feature1)
@@ -291,7 +291,7 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature4)
 #display(feature5)
 
-array = face_features_2(img);
+array = face_features(img);
 display(array[1])
 display(array[2])
 display(array[3])
