@@ -19,7 +19,7 @@ hay tres extracciones
     · :A21 (aproximación 2 extracción 1)
     · :A22 (aproximación 2 extracción 2)
 =#
-extraction = :A21;
+extraction = :A31;
 dataset_name="datasets/faces.data";
 change = false;
 if extraction==:A1
@@ -31,6 +31,9 @@ elseif extraction==:A21
 elseif (extraction==:A22 || extraction==:A23)
     x = 36;
     y = 37;
+elseif extraction==:A31
+    x = 48;
+    y = 49;
 end;
 if (!isfile(dataset_name) || change)
     createDataset(dataset_name,extraction);
@@ -56,12 +59,12 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
-=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
+=#
 
 # Entrenamos svm
 modelHyperparameters = Dict();

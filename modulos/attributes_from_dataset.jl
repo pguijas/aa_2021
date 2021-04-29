@@ -51,6 +51,8 @@ function loadFolderImages(folderName::String, extr::Symbol)
         return face_features_2.(images);
     elseif extr==:A23
         return face_features_3.(images);
+    elseif extr==:A31
+        return face_features_masc.(images);
     end;
 
 end;
@@ -100,11 +102,13 @@ function getInputs(path::String; extr::Symbol=:A21)
         cols = 42;
     elseif (extr==:A22 || extr==:A23)
         cols = 36;
+    elseif (extr==:A31)
+        cols = 48;
     end;
     inputs = Array{Float64, 2}(undef, rows, cols);
     targets = Array{String, 1}(undef, rows);
-    @show(cols);
-    @show(rows);
+    #@show(cols);
+    #@show(rows);
     #==
     Cara || No_Cara || Cara_Masc
     ==#
@@ -166,7 +170,7 @@ function getAttrFromImgv2(array)
             push!(attr, 𝑋);
         end;
     end;
-    #@show(inputs);
+    #@show(attr);
     return attr;
 end;
 
@@ -235,6 +239,34 @@ function face_features_3(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Floa
     push!(array_of_images, nose);
     mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
     push!(array_of_images, mouth);
+
+    # ya la devolvemos el formato de Float64
+    return imageToColorArray.(array_of_images);
+end;
+
+function face_features_masc(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
+
+    # devolvemos un array de imágenes
+    array_of_images = [image];
+    # tamaños de la imagen para recortes
+    (h, w) = size(image);
+    # empieza la extracción de características
+    counc = image[1:(h ÷ 20 * 5), (w ÷ 20 * 8):(w ÷ 20 * 12)];
+    push!(array_of_images, counc);
+    left_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20 * 9)];
+    push!(array_of_images, left_eye);
+    right_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
+    push!(array_of_images, right_eye);
+    left_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20 * 7)];
+    push!(array_of_images, left_checkb);
+    right_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 19)];
+    push!(array_of_images, right_checkb);
+    nose = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 13)];
+    push!(array_of_images, nose);
+    mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
+    push!(array_of_images, mouth);
+    # visualizamos los recortes
+    #visualize_masc(img, h, w);
 
     # ya la devolvemos el formato de Float64
     return imageToColorArray.(array_of_images);
