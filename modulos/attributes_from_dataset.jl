@@ -90,7 +90,10 @@ function getInputs(path::String; extr::Symbol=:A21)
     # Obtenemos todas las fotos clasificadas en positivas y negativas
     (caraDataset, negativeDataset, mascarillaDataset) = loadDataset(path, extr);
     # Generamos la matriz de inputs y targets
-    rows = size(caraDataset,1) + size(negativeDataset,1);
+    sizeFaceDataset = size(caraDataset,1);
+    sizeMaskDataset = size(mascarillaDataset,1);
+    sizeNegativeDataset = size(negativeDataset,1);
+    rows = sizeFaceDataset + sizeMaskDataset + sizeNegativeDataset;
     if extr==:A1
         cols = 6;
     elseif extr==:A21
@@ -99,44 +102,53 @@ function getInputs(path::String; extr::Symbol=:A21)
         cols = 36;
     end;
     inputs = Array{Float64, 2}(undef, rows, cols);
-    targets = [
-        trues(size(positiveDataset,1));
-        falses(size(negativeDataset,1));
-    ];
-    targets=convert(Array{Bool, 1},targets)
+    targets = Array{String, 1}(undef, rows);
+    @show(cols);
+    @show(rows);
+    #==
+    Cara || No_Cara || Cara_Masc
+    ==#
+    # ¿?¿?targets=convert(Array{Bool, 1},targets)
     v1 = false;
     if extr==:A1
         v1 = true;
     end;
     # Generamos la primera parte de la matriz de inputs con los elementos
     # que son positivos
-    for i in 1:size(positiveDataset,1)
-        foto = positiveDataset[i];
+    for i in 1:sizeFaceDataset
+        foto = caraDataset[i];
+        targets[i] = "Face";
         inputs[i,:] = v1 ? getAttributesFromImage(foto) : getAttrFromImgv2(foto);
     end;
 
+    # Generamos la tercera parte de la matriz de inputs con los elementos
+    # que son caras con mascarilla
+    for i in 1:sizeMaskDataset
+        foto = mascarillaDataset[i];
+        targets[sizeFaceDataset+i] = "Mask";
+        inputs[sizeFaceDataset+i,:] = v1 ? getAttributesFromImage(foto) : getAttrFromImgv2(foto);
+    end;
 
     # Generamos la segunda parte de la matriz de inputs con los elementos
     # que son negativos
-    for i in (size(positiveDataset,1) + 1):rows
-        foto = negativeDataset[rows-i + 1];
-        inputs[i,:] = v1 ? getAttributesFromImage(foto) : getAttrFromImgv2(foto);
+    aux = sizeFaceDataset+sizeMaskDataset;
+    for i in 1:sizeNegativeDataset
+        foto = negativeDataset[i];
+        targets[aux+i] = "NotFace";
+        inputs[aux+i,:] = v1 ? getAttributesFromImage(foto) : getAttrFromImgv2(foto);
     end;
+
     return (inputs,targets)
 end
 
-function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Array{Bool, 1})
+function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Array{String, 1})
     f = open(file_name, "w")
     for line in 1:size(inputs,1)
         string_line=""
         for item in inputs[line,:]
             string_line=string(string_line,item,",")
         end
-        if (targets[line])
-            string_line=string(string_line,"1")
-        else
-            string_line=string(string_line,"0")
-        end
+        string_line=string(string_line,targets[line])
         print(f,string_line)
         println(f,"")
     end
