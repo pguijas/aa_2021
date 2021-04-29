@@ -60,7 +60,7 @@ maxDepth = 8;
 numNeighbors = 2;
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);
-
+#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["topology"] = topology;
@@ -70,7 +70,7 @@ modelHyperparameters["numExecutions"] = numRepetitionsAANTraining;
 modelHyperparameters["maxEpochs"] = numMaxEpochs;
 modelHyperparameters["maxEpochsVal"] = maxEpochsVal;
 modelCrossValidation(:ANN, modelHyperparameters, inputs, targets, numFolds);
-
+=#
 # Entrenamos las SVM
 modelHyperparameters = Dict();
 modelHyperparameters["kernel"] = kernel;

@@ -56,28 +56,28 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
+=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
-=#
 
 # Entrenamos svm
-#=
 modelHyperparameters = Dict();
-modelHyperparameters["kernel"] = "linear";
+modelHyperparameters["kernel"] = "rbf";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 20;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 
-=#
+#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
 modelHyperparameters["maxNNxlayer"] = 16;
 modelHyperparameters["layers"] = 1;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
+=#
 
 #=
 modelHyperparameters = Dict();
