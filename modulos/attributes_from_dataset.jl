@@ -59,10 +59,10 @@ end;
 
 # Funcion para cargar todo el dataset (positivos y negativos)
 function loadDataset(folderName::String, extr::Symbol)
-    @show(extr)
-    positiveDataset = loadFolderImages(string(folderName, "/recortes"),extr);
+    caraDataset = loadFolderImages(string(folderName, "/recortes"),extr);
     negativeDataset = loadFolderImages(string(folderName, "/cara_negativo"),extr);
-    return (positiveDataset, negativeDataset);
+    mascarillaDataset = loadFolderImages(string(folderName, "/cara_mascarilla"),extr);
+    return (caraDataset, negativeDataset, mascarillaDataset);
 end;
 
 # =============================================================================
@@ -88,9 +88,9 @@ end
 # desviacion tipica) para cada canal RGB y un vector de targets
 function getInputs(path::String; extr::Symbol=:A21)
     # Obtenemos todas las fotos clasificadas en positivas y negativas
-    (positiveDataset, negativeDataset) = loadDataset(path, extr);
+    (caraDataset, negativeDataset, mascarillaDataset) = loadDataset(path, extr);
     # Generamos la matriz de inputs y targets
-    rows = size(positiveDataset,1) + size(negativeDataset,1);
+    rows = size(caraDataset,1) + size(negativeDataset,1);
     if extr==:A1
         cols = 6;
     elseif extr==:A21
