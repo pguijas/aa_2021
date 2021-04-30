@@ -43,7 +43,7 @@ seed!(1);
 numFolds = 10;
 
 # Parametros principales de la RNA y del proceso de entrenamiento
-topology = [3]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
+topology = [10, 10]; # Dos capas ocultas con 4 neuronas la primera y 3 la segunda
 learningRate = 0.01; # Tasa de aprendizaje
 numMaxEpochs = 1000; # Numero maximo de ciclos de entrenamiento
 validationRatio = 0.2; # Porcentaje de patrones que se usaran para validacion. Puede ser 0, para no usar validacion
@@ -52,16 +52,16 @@ numRepetitionsAANTraining = 50; # Numero de veces que se va a entrenar la RNA pa
 # Parametros del SVM
 kernel = "rbf";
 kernelDegree = 2;
-kernelGamma = 4;
+kernelGamma = 2;
 C=1;
 # Parametros del arbol de decision
-maxDepth = 8;
+maxDepth = 7;
 # Parapetros de kNN
-numNeighbors = 2;
+numNeighbors = 1;
 # Normalizamos las entradas, a pesar de que algunas se vayan a utilizar para test
 #normalizeMinMax!(inputs);
-#=
 # Entrenamos las RR.NN.AA.
+#=
 modelHyperparameters = Dict();
 modelHyperparameters["topology"] = topology;
 modelHyperparameters["learningRate"] = learningRate;
@@ -78,9 +78,10 @@ modelHyperparameters["kernelDegree"] = kernelDegree;
 modelHyperparameters["kernelGamma"] = kernelGamma;
 modelHyperparameters["C"] = C;
 modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
-
 # Entrenamos los arboles de decision
 modelCrossValidation(:DecisionTree, Dict("maxDepth" => maxDepth), inputs, targets, numFolds);
 
 # Entrenamos los kNN
 modelCrossValidation(:kNN, Dict("numNeighbors" => numNeighbors), inputs, targets, numFolds);
+#=
+=#

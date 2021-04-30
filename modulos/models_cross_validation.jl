@@ -38,7 +38,9 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
     # En este caso, solo voy a usar precision y F1, en otro problema podrían ser distintas
     testAccuracies = Array{Float64,1}(undef, numFolds);
     testF1         = Array{Float64,1}(undef, numFolds);
-    
+
+    max_value=0;
+
     # Para cada fold, entrenamos
     for numFold in 1:numFolds
 
@@ -67,7 +69,10 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
 
             # Calculamos las metricas correspondientes con la funcion desarrollada en la practica anterior
             (acc, _, _, _, _, _, F1, _) = confusionMatrix(testOutputs, testTargets);
-
+            if (max_value<acc)
+                max_value = acc;
+                printConfusionMatrix(testOutputs, testTargets);
+            end;
         else
 
             # Vamos a usar RR.NN.AA.
@@ -115,7 +120,10 @@ function modelCrossValidation(modelType::Symbol, modelHyperparameters::Dict, inp
 
                 # Calculamos las metricas correspondientes con la funcion desarrollada en la practica anterior
                 (testAccuraciesEachRepetition[numTraining], _, _, _, _, _, testF1EachRepetition[numTraining], _) = confusionMatrix(collect(ann(testInputs')'), testTargets);
-
+                if (max_value<testAccuraciesEachRepetition[numTraining])
+                    max_value = testAccuraciesEachRepetition[numTraining];
+                    printConfusionMatrix(collect(ann(testInputs')'), testTargets);
+                end;
             end;
 
             # Calculamos el valor promedio de todos los entrenamientos de este fold

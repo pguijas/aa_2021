@@ -19,9 +19,9 @@ hay tres extracciones
     · :A21 (aproximación 2 extracción 1)
     · :A22 (aproximación 2 extracción 2)
 =#
-extraction = :A31;
+extraction = :A21;
 dataset_name="datasets/faces.data";
-change = false;
+change = true;
 if extraction==:A1
     x = 6;
     y = 7;
@@ -59,13 +59,14 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
+=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
-=#
 
+#=
 # Entrenamos svm
 modelHyperparameters = Dict();
 modelHyperparameters["kernel"] = "rbf";
@@ -73,7 +74,6 @@ modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 20;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 
-#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
@@ -82,10 +82,9 @@ modelHyperparameters["layers"] = 1;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 =#
 
-#=
+
 modelHyperparameters = Dict();
-modelHyperparameters["fstNeuron"] = 1;
-modelHyperparameters["maxNNxlayer"] = 8;
+modelHyperparameters["fstNeuron"] = 5;
+modelHyperparameters["maxNNxlayer"] = 12;
 modelHyperparameters["layers"] = 2;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-=#
