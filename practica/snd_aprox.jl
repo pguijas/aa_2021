@@ -352,7 +352,105 @@ function face_features_masc(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{F
     return imageToColorArray.(array_of_images);
 end;
 
+function visualize_masc2(img, h, w)
 
+    # ojos y cejas
+    img[(1):(h ÷ 3),     (1):(1)] .= RGB(1,0,0); #raya derecha
+    img[(1):(1),         (1):(w)] .= RGB(1,0,0); #raya arriba
+    img[(1):(h ÷ 3),     (w):(w)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 3):(h ÷ 3), (1):(w)] .= RGB(1,0,0); #raya abajo
+
+    # entrecejo
+    img[1:(h ÷ 20 * 5),             (w ÷ 20 * 8):(w ÷ 20 * 8)]   .= RGB(0,0,1); #raya derecha
+    img[1:1,                        (w ÷ 20 * 8):(w ÷ 20 * 12)]  .= RGB(0,0,1); #raya arriba
+    img[1:(h ÷ 20 * 5),             (w ÷ 20 * 12):(w ÷ 20 * 12)] .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 5):(h ÷ 20 * 5),  (w ÷ 20 * 8):(w ÷ 20 * 12)]  .= RGB(0,0,1); #raya abajo
+
+    # ojo y ceja izq
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20)]         .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20):(h ÷ 20),(w ÷ 20):(w ÷ 20 * 9)]     .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 9):(w ÷ 20 * 9)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 3):(h ÷ 3),  (w ÷ 20):(w ÷ 20 * 9)]     .= RGB(1,0,0); #raya abajo
+
+    # ojo y ceja der
+    img[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 12):(w ÷ 20 * 12)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 2):(h ÷ 20 * 2), (w ÷ 20 * 12):(w ÷ 20 * 18)] .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 18):(w ÷ 20 * 18)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 5):(h ÷ 20 * 5), (w ÷ 20 * 12):(w ÷ 20 * 18)] .= RGB(1,0,0); #raya abajo
+
+    # ojo izq
+    img[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 2):(w ÷ 20 * 2)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 2):(h ÷ 20 * 2), (w ÷ 20 * 2):(w ÷ 20 * 8)] .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 8):(w ÷ 20 * 8)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 5):(h ÷ 20 * 5), (w ÷ 20 * 2):(w ÷ 20 * 8)] .= RGB(1,0,0); #raya abajo
+
+    # ojo der
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 11)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20):(h ÷ 20),(w ÷ 20 * 11):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 19):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 3):(h ÷ 3),  (w ÷ 20 * 11):(w ÷ 20 * 19)] .= RGB(1,0,0); #raya abajo
+
+    # pómulo izq
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20)]         .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20):(w ÷ 20 * 7)]     .= RGB(0,1,0); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 7)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20):(w ÷ 20 * 7)]     .= RGB(0,1,0); #raya abajo
+
+    # pómulo der
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 13)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 13):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 19):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 13):(w ÷ 20 * 19)] .= RGB(0,1,0); #raya abajo
+
+    # nariz
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 7)]   .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 6):(h ÷ 20 * 6),  (w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya arriba
+    img[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 13)] .= RGB(0,0,1); #raya derecha
+    img[(h ÷ 20 * 12):(h ÷ 20 * 12),(w ÷ 20 * 7):(w ÷ 20 * 13)]  .= RGB(0,0,1); #raya abajo
+
+    # boca
+    img[(h ÷ 20 * 10):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 4)]  .= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 10):(h ÷ 20 * 10),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(1,0,0); #raya arriba
+    img[(h ÷ 20 * 10):(h ÷ 20 * 16),(w ÷ 20 * 16):(w ÷ 20 * 16)].= RGB(1,0,0); #raya derecha
+    img[(h ÷ 20 * 16):(h ÷ 20 * 16),(w ÷ 20 * 4):(w ÷ 20 * 16)] .= RGB(1,0,0); #raya abajo
+
+    display(img);
+    save("/home/hector/Downloads/char_hec.jpeg", img)
+end;
+
+function face_features_masc2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
+
+    # devolvemos un array de imágenes
+    array_of_images = [];
+    # tamaños de la imagen para recortes
+    (h, w) = size(image);
+    # empieza la extracción de características
+    eyes_and_eyebrows = image[(1):(h ÷ 3), (1):(w)];
+    push!(array_of_images, eyes_and_eyebrows);
+    counc = image[1:(h ÷ 20 * 5), (w ÷ 20 * 8):(w ÷ 20 * 12)];
+    push!(array_of_images, counc);
+    left_eye = image[(h ÷ 20):(h ÷ 3), (w ÷ 20):(w ÷ 20 * 9)];
+    push!(array_of_images, left_eye);
+    right_eye = image[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 12):(w ÷ 20 * 18)];
+    push!(array_of_images, right_eye);
+    left_eye2 = image[(h ÷ 20 * 2):(h ÷ 20 * 5), (w ÷ 20 * 2):(w ÷ 20 * 8)];
+    push!(array_of_images, left_eye);
+    right_eye2 = image[(h ÷ 20):(h ÷ 3), (w ÷ 20 * 11):(w ÷ 20 * 19)];
+    push!(array_of_images, right_eye);
+    left_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20):(w ÷ 20 * 7)];
+    push!(array_of_images, left_checkb);
+    right_checkb = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 13):(w ÷ 20 * 19)];
+    push!(array_of_images, right_checkb);
+    nose = image[(h ÷ 20 * 6):(h ÷ 20 * 12), (w ÷ 20 * 7):(w ÷ 20 * 13)];
+    push!(array_of_images, nose);
+    mouth = image[(h ÷ 20 * 10):(h ÷ 20 * 16), (w ÷ 20 * 4):(w ÷ 20 * 16)];
+    push!(array_of_images, mouth);
+    # visualizamos los recortes
+    visualize_masc2(img, h, w);
+
+    # ya la devolvemos el formato de Float64
+    return imageToColorArray.(array_of_images);
+end;
 
 
 #img = load("../datasets/cara_positivo/3.jpeg");
@@ -370,10 +468,8 @@ img = convert(Array{RGB{Normed{UInt8,8}},2},img);
 #display(feature4)
 #display(feature5)
 
-array = face_features_masc(img);
-display(array[1])
-display(array[2])
-display(array[3])
+array = face_features_masc2(img);
+@show(sizeof(array))
 
 #=
 array = face_features_hector(img);#face_features_pedro(img);

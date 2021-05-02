@@ -131,7 +131,7 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
         modelHyperparameters["kernel"] = kernel;
         modelHyperparameters["kernelDegree"] = 3;
         modelHyperparameters["kernelGamma"] = 2;
-        modelHyperparameters["C"] = 1;
+        modelHyperparameters["C"] = 1000000;
         (μ_testAcc, σ_stdAcc, μ_testF1, σ_stdF1) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
         println(string("Test accuracies for linear kernel: ",μ_testAcc))
         println(string("Standard deviation for test accuracies of linear kernel: ",σ_stdAcc))
@@ -157,7 +157,7 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
                     modelHyperparameters["kernel"] = kernel;
                     modelHyperparameters["kernelDegree"] = degree;
                     modelHyperparameters["kernelGamma"] = γ;
-                    modelHyperparameters["C"] = 1;
+                    modelHyperparameters["C"] = 1000000;
                     (μ_testAcc, σ_stdAcc, μ_testF1, σ_stdF1) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
                     if plot3d
                         push!(μ_acc,μ_testAcc);
@@ -186,7 +186,7 @@ function testSVM(inputs::Array{Float64,2}, targets::Array{Any,1}, parameters::Di
                 modelHyperparameters["kernel"] = "rbf";
                 modelHyperparameters["kernelDegree"] = kernel°;
                 modelHyperparameters["kernelGamma"] = γ;
-                modelHyperparameters["C"] = 1;
+                modelHyperparameters["C"] = 1000000;
                 (μ_testAcc, σ_stdAcc, μ_testF1, σ_stdF1) = modelCrossValidation(:SVM, modelHyperparameters, inputs, targets, numFolds);
                 push!(μ_acc,μ_testAcc);
                 push!(σ_acc,σ_stdAcc);
