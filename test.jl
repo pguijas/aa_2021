@@ -14,14 +14,15 @@ function createDataset(dataset_name::String, extraction::Symbol)
 end;
 
 #=
-hay tres extracciones
+hay diferentes extracciones:
     · :A1 (aproximación 1)
     · :A21 (aproximación 2 extracción 1)
     · :A22 (aproximación 2 extracción 2)
+    etc...
 =#
 extraction = :A33;
 dataset_name="datasets/faces.data";
-change = false;
+change = true;
 if extraction==:A1
     x = 6;
     y = 7;
@@ -68,12 +69,12 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
+=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds; rep=:All);
-=#
 
 # Entrenamos svm
 modelHyperparameters = Dict();
@@ -82,7 +83,6 @@ modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 10;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 
-#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
@@ -96,4 +96,3 @@ modelHyperparameters["fstNeuron"] = 6;
 modelHyperparameters["maxNNxlayer"] = 12;
 modelHyperparameters["layers"] = 2;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-=#
