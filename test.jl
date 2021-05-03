@@ -19,9 +19,9 @@ hay tres extracciones
     · :A21 (aproximación 2 extracción 1)
     · :A22 (aproximación 2 extracción 2)
 =#
-extraction = :A32;
+extraction = :A33;
 dataset_name="datasets/faces.data";
-change = true;
+change = false;
 if extraction==:A1
     x = 6;
     y = 7;
@@ -37,6 +37,12 @@ elseif extraction==:A31
 elseif extraction==:A32
     x = 66;
     y = 67;
+elseif extraction==:A33
+    x = 72;
+    y = 73;
+elseif extraction==:A34
+    x = 84;
+    y = 85;
 end;
 if (!isfile(dataset_name) || change)
     createDataset(dataset_name,extraction);
@@ -63,17 +69,17 @@ Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
 # Entrenamos knn
-testingModels(:KNN, Dict("maxNeighbors" => 40), inputs, targets, numFolds; rep=:All);
+testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
-testingModels(:DecisionTree, Dict("maxDepth" => 40), inputs, targets, numFolds; rep=:All);
+testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds; rep=:All);
 =#
 
 # Entrenamos svm
 modelHyperparameters = Dict();
 modelHyperparameters["kernel"] = "rbf";
 modelHyperparameters["kernelDegree"] = 15;
-modelHyperparameters["maxGamma"] = 20;
+modelHyperparameters["maxGamma"] = 10;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
 
 #=
