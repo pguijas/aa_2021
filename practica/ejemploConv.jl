@@ -5,10 +5,10 @@ using JLD2, FileIO
 using Statistics: mean
 
 
-train_imgs   = load("MNIST.jld2", "train_imgs");
-train_labels = load("MNIST.jld2", "train_labels");
-test_imgs    = load("MNIST.jld2", "test_imgs");
-test_labels  = load("MNIST.jld2", "test_labels");
+train_imgs   = load("datasets/MNIST.jld2", "train_imgs");
+train_labels = load("datasets/MNIST.jld2", "train_labels");
+test_imgs    = load("datasets/MNIST.jld2", "test_imgs");
+test_labels  = load("datasets/MNIST.jld2", "test_labels");
 
 # Tanto train_imgs como test_imgs son arrays de arrays bidimensionales (arrays de imagenes), es decir, son del tipo Array{Array{Float32,2},1}
 #  Generalmente en Deep Learning los datos estan en tipo Float32 y no Float64, es decir, tienen menos precision
@@ -58,12 +58,12 @@ println("He creado ", length(gruposIndicesBatch), " grupos de indices para distr
 # Creamos el conjunto de entrenamiento: va a ser un vector de tuplas
 #  Cada tupla va a tener, como primer elemento, las imagenes de ese batch
 #  Como segundo elemento, las salidas deseadas (en booleano) de esas imagenes
-train_set = Tuple{Array{Float32,4},Flux.OneHotMatrix{Array{Flux.OneHotVector,1}}}[];
-for indicesBatch in gruposIndicesBatch
-    push!(train_set, (train_imgs[:,:,:,indicesBatch], onehotbatch(train_labels[indicesBatch], 0:9)));
-end
+#train_set = Tuple{Array{Float32,4},Flux.OneHotMatrix{Array{Flux.OneHotVector,1}}}[];
+#for indicesBatch in gruposIndicesBatch
+#    push!(train_set, (train_imgs[:,:,:,indicesBatch], onehotbatch(train_labels[indicesBatch], 0:9)));
+#end
 # Esto de arriba se hace mas facilmente asi:
-# train_set = [( train_imgs[:,:,:,indicesBatch], Array(onehotbatch(train_labels[indicesBatch], 0:9)) ) for indicesBatch in gruposIndicesBatch]
+train_set = [( train_imgs[:,:,:,indicesBatch], Array(onehotbatch(train_labels[indicesBatch], 0:9)) ) for indicesBatch in gruposIndicesBatch]
 
 
 # Creamos un batch con todas las imagenes de test
