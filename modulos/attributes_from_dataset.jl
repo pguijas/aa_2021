@@ -25,7 +25,6 @@ function loadFolderImages(folderName::String, extr::Symbol)
     # Comprobar que la foto este en formato .JPEG
     isImageExtension(fileName::String) = any(uppercase(fileName[end-4:end]) .== [".JPEG"]);
     images = [];
-
     # Para cada fichero que detecte en la carpeta dada
     for fileName in readdir(folderName)
         println(fileName)
@@ -119,16 +118,12 @@ function getInputs(path::String; extr::Symbol=:A21)
     end;
     inputs = Array{Float64, 2}(undef, rows, cols);
     targets = Array{String, 1}(undef, rows);
-    #@show(cols);
-    #@show(rows);
-    #==
-    Cara || No_Cara || Cara_Masc
-    ==#
-    # ¿?¿?targets=convert(Array{Bool, 1},targets)
+
     v1 = false;
     if extr==:A1
         v1 = true;
     end;
+
     # Generamos la primera parte de la matriz de inputs con los elementos
     # que son positivos
     for i in 1:sizeFaceDataset

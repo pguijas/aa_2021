@@ -10,6 +10,15 @@ train_labels = load("datasets/MNIST.jld2", "train_labels");
 test_imgs    = load("datasets/MNIST.jld2", "test_imgs");
 test_labels  = load("datasets/MNIST.jld2", "test_labels");
 
+@show(typeof(train_imgs));
+@show(train_labels);
+@show(typeof(test_imgs));
+@show(typeof(test_labels));
+
+@show(size(train_imgs));
+@show(size(test_imgs));
+
+
 # Tanto train_imgs como test_imgs son arrays de arrays bidimensionales (arrays de imagenes), es decir, son del tipo Array{Array{Float32,2},1}
 #  Generalmente en Deep Learning los datos estan en tipo Float32 y no Float64, es decir, tienen menos precision
 #  Esto se hace, entre otras cosas, porque las tarjetas gráficas (excepto las más recientes) suelen operar con este tipo de dato
