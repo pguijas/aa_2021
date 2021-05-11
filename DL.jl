@@ -3,6 +3,13 @@ using Flux: onehotbatch, onecold, crossentropy
 using JLD2, FileIO
 using Statistics: mean
 
+#===============================================================================
+COSAS:
+    · en toFloatArray no me deja hacer un assert de una comp de ints:  MethodError: objects of type Int64 are not callable
+
+===============================================================================#
+
+
 include("modulos/dataset_DL.jl")
 
 interval = 6;
@@ -10,16 +17,30 @@ interval = 6;
     test_imgs, test_labels) = getInputs("datasets", interval);
 
 #=
+for image in train_imgs
+    display(image);
+end;
+for image in test_imgs
+    display(image);
+end;
+=#
+
+train_imgs = toFloatArray(train_imgs);
+test_imgs = toFloatArray(test_imgs);
+
+
 println("Tamaño de la matriz de entrenamiento: ", size(train_imgs))
 println("Tamaño de la matriz de test:          ", size(test_imgs))
 
-batch_size = 128;
-gruposIndicesBatch = Iterators.partition(1:size(train_imgs,1), batch_size);
+
+
+batch_size = 64;
+gruposIndicesBatch = Iterators.partition(1:size(train_imgs,4), batch_size);
 println("He creado ", length(gruposIndicesBatch), " grupos de indices para distribuir los patrones en batches");
 
-train_set = [( train_imgs[indicesBatch], Array(onehotbatch(train_labels[indicesBatch], 0:9)) ) for indicesBatch in gruposIndicesBatch]
+train_set = [( train_imgs[:,:,:,indicesBatch], Array(onehotbatch(train_labels[indicesBatch], 0:2)) ) for indicesBatch in gruposIndicesBatch]
 
-test_set = (test_imgs, onehotbatch(test_labels, 0:9));
+test_set = (test_imgs, onehotbatch(test_labels, 0:2));
 
 train_imgs = nothing;
 test_imgs = nothing;
@@ -29,14 +50,14 @@ funcionTransferenciaCapasConvolucionales = relu;
 
 # Definimos la red con la funcion Chain, que concatena distintas capas
 modelo = Chain(
-    Conv((3, 3), 1=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    Conv((3, 3), 3=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
     Conv((3, 3), 16=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
     Conv((3, 3), 32=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
     x -> reshape(x, :, size(x, 4)),
-    Dense(288, 10),
+    Dense(10368, 3),
     softmax
 );
 
@@ -46,7 +67,7 @@ modelo = Chain(
 numBatchCoger = 1; numImagenEnEseBatch = [12, 6];
 
 
-ntradaCapa = train_set[numBatchCoger][1][:,:,:,numImagenEnEseBatch];
+entradaCapa = train_set[numBatchCoger][1][:,:,:,numImagenEnEseBatch];
 numCapas = length(params(modelo));
 println("La RNA tiene ", numCapas, " capas:");
 for numCapa in 1:numCapas
@@ -66,7 +87,7 @@ accuracy(batch) = mean(onecold(modelo(batch[1])) .== onecold(batch[2]))
 
 println("Ciclo 0: Precision en el conjunto de entrenamiento: ", 100*mean(accuracy.(train_set)), " %");
 
-pt = ADAM(0.001);
+opt = ADAM(0.001);
 
 
 println("Comenzando entrenamiento...")
@@ -78,7 +99,7 @@ mejorModelo = nothing;
 
 while (!criterioFin)
 
-    global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo;
+    global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo, criterioFin;
 
     Flux.train!(loss, params(modelo), train_set, opt);
 
@@ -111,4 +132,3 @@ while (!criterioFin)
         criterioFin = true;
     end;
 end;
-=#

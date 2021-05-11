@@ -2,22 +2,26 @@ using Images;
 using FileIO;
 
 
-function imageToArray(image::Array{RGB{Normed{UInt8,8}},2})
-    matrix = Array{Float32, 4}(undef, size(image,1), size(image,2), 3, 1)
-    matrix[:,:,1] = convert(Array{Float32,2}, red.(image));
-    matrix[:,:,2] = convert(Array{Float32,2}, green.(image));
-    matrix[:,:,3] = convert(Array{Float32,2}, blue.(image));
-    return matrix;
-end;
 
-imageToArray(image::Array{RGBA{Normed{UInt8,8}},2}) = imageToArray(RGB.(image));
+function toFloatArray(images::Array{Array{RGB{Normed{UInt8,8}},2},1})
+    size = length(images);
+    floatArray = Array{Float32,4}(undef, 150, 150, 3, size);
+    for i in 1:size
+        #@assert (size(images[i])==(150,150)) "Las imagenes no tienen tamaño 150x150";
+        # ns pq esto no funciona
+        floatArray[:,:,1,i] .= convert(Array{Float32,2}, red.(images[i]));
+        floatArray[:,:,2,i] .= convert(Array{Float32,2}, green.(images[i]));
+        floatArray[:,:,3,i] .= convert(Array{Float32,2}, blue.(images[i]));
+    end;
+    return floatArray;
+end;
 
 
 function loadFolderImages(folderName::String, testRatio::Int64)
 
     # Comprobar que la foto este en formato .JPEG
     isImageExtension(fileName::String) = any(uppercase(fileName[end-4:end]) .== [".JPEG"]);
-    images = [];
+    trainImages = [];
     testImages = [];
 
     count = 1;
@@ -39,22 +43,26 @@ function loadFolderImages(folderName::String, testRatio::Int64)
                 push!(testImages, image);
             else
                 # Añadimos la foto al array de imagenes
-                push!(images, image);
+                push!(trainImages, image);
             end;
             count += 1;
         end;
     end;
 
-    # Devolvemos el array con las imagenes convertidas a Float32
-    return (imageToArray.(images), imageToArray.(testImages));
+    # Devolvemos el array con las imagenes de entrenamiento y test
+    return (trainImages, testImages);
 end;
 
 
 function loadDataset(folderName::String, testRatio::Int64)
-    (caras, testCaras) = loadFolderImages(string(folderName, "/DL/caras"), testRatio);
-    (negativo, testNegativo) = loadFolderImages(string(folderName, "/DL/no_caras"), testRatio);
-    (mascarillas, testMascarillas) = loadFolderImages(string(folderName, "/DL/mascarilla"), testRatio);
-    return (caras, testCaras, negativo, testNegativo, mascarillas, testMascarillas);
+    (trainCaras, testCaras) =
+        loadFolderImages(string(folderName, "/DL/caras"), testRatio);
+    (trainNegativo, testNegativo) =
+        loadFolderImages(string(folderName, "/DL/no_caras"), testRatio);
+    (trainMascarillas, testMascarillas) =
+        loadFolderImages(string(folderName, "/DL/mascarilla"), testRatio);
+    return (trainCaras, testCaras, trainNegativo, testNegativo,
+            trainMascarillas, testMascarillas);
 end;
 
 
@@ -72,10 +80,10 @@ function getInputs(path::String, testRatio::Int64)
     sizeNegativeDatasetTest = size(testNegativo,1);
     testLength = sizeFaceDatasetTest + sizeMaskDatasetTest + sizeNegativeDatasetTest;
 
-    train_imgs = Array{Float32, 3}(undef, 150, 150, 3, length);
+    train_imgs = Array{Array{RGB{Normed{UInt8,8}},2},1}(undef, length);
     #train_imgs = [];
     train_labels = Array{Int64, 1}(undef, length);
-    test_imgs = Array{Float32, 3}(undef, 150, 150, 3, testLength);
+    test_imgs = Array{Array{RGB{Normed{UInt8,8}},2},1}(undef, testLength);
     #test_imgs = [];
     test_labels = Array{Int64, 1}(undef, testLength);
 
@@ -122,9 +130,6 @@ function getInputs(path::String, testRatio::Int64)
         test_labels[aux+i] = 2;
         test_imgs[aux+i] = testNegativo[i];
     end;
-
-    train_imgs = convert(Array{Float32,4},train_imgs);
-    test_imgs = convert(Array{Float32,4},test_imgs);
 
     return (train_imgs, train_labels, test_imgs, test_labels);
 end;
