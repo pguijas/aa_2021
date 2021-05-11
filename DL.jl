@@ -9,7 +9,7 @@ interval = 6;
 (train_imgs, train_labels,
     test_imgs, test_labels) = getInputs("datasets", interval);
 
-
+#=
 println("Tamaño de la matriz de entrenamiento: ", size(train_imgs))
 println("Tamaño de la matriz de test:          ", size(test_imgs))
 
@@ -111,3 +111,4 @@ while (!criterioFin)
         criterioFin = true;
     end;
 end;
+=#

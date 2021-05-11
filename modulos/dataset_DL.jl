@@ -25,14 +25,14 @@ function loadFolderImages(folderName::String, testRatio::Int64)
     for fileName in readdir(folderName)
         if isImageExtension(fileName)
             # Leemos la imagen
-            print(fileName)
+            #print(fileName)
             image = load(string(folderName, "/", fileName));
             # Comprobar que el archivo cargado sea una imagen en color
             if (typeof(image)==Array{RGBX{Normed{UInt8,8}},2})
                 image=convert(Array{RGB{Normed{UInt8,8}},2},image);
             end;
             @assert(isa(image, Array{RGBA{Normed{UInt8,8}},2}) || isa(image, Array{RGB{Normed{UInt8,8}},2}))
-            @show(size(image))
+            #@show(size(image))
             @assert (size(image)==(150,150)) "Las imagenes no tienen tamaño 150x150";
             if (mod(count,testRatio)==0)
                 # Añadimos la foto al array de test
@@ -72,10 +72,10 @@ function getInputs(path::String, testRatio::Int64)
     sizeNegativeDatasetTest = size(testNegativo,1);
     testLength = sizeFaceDatasetTest + sizeMaskDatasetTest + sizeNegativeDatasetTest;
 
-    train_imgs = Array{Float32, 4}(undef, 150, 150, 3, length);
+    train_imgs = Array{Float32, 3}(undef, 150, 150, 3, length);
     #train_imgs = [];
     train_labels = Array{Int64, 1}(undef, length);
-    test_imgs = Array{Float32, 4}(undef, 150, 150, 3, testLength);
+    test_imgs = Array{Float32, 3}(undef, 150, 150, 3, testLength);
     #test_imgs = [];
     test_labels = Array{Int64, 1}(undef, testLength);
 
@@ -122,6 +122,9 @@ function getInputs(path::String, testRatio::Int64)
         test_labels[aux+i] = 2;
         test_imgs[aux+i] = testNegativo[i];
     end;
+
+    train_imgs = convert(Array{Float32,4},train_imgs);
+    test_imgs = convert(Array{Float32,4},test_imgs);
 
     return (train_imgs, train_labels, test_imgs, test_labels);
 end;
