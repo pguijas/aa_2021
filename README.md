@@ -1,5 +1,18 @@
-# Prácticas Aprendizaje Automático
-## Ingeniería Informática UDC - Curso 2020/2021
+# Sistema de detección de mascarillas en rostros
+
+<div style="text-align:center">
+
+<img width="50%" src="img/UDC-emblema.jpeg"/>
+
+</div>
+<br><br>
+
+![Build Status](https://shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Julia Version](img/cont.jpeg)
+![Julia Version](img/julia.jpeg)
+![Julia Version](img/flux.jpeg)
+![Julia Version](img/sktl.jpeg)
 ## Autores
 * Pedro Guijas Bravo
 * Eliseo Bao Souto
@@ -9,7 +22,12 @@
 
 ## Uso y Generación del dataset
 Para generar el archivo faces.data (ya existe en el repo), ya sea porque se quiere cambiar la extracción o por el motivo que sea, será necesario descargar el dataset con imágenes. Actualmente se aplica la extracción de características que aparece en la siguiente imagen, aun que se pueden aplicar hasta 8 extracciones diferentes.
-<div style="text-align:center"><img width="40%" src="img/char_hec.jpeg"/></div>
+
+<div style="text-align:center">
+
+<img width="40%" src="img/char_hec.jpeg"/>
+
+</div>
 <br><br>
 
 ### Generación del dataset
@@ -38,8 +56,8 @@ Resultados
 
 | | RNA | CNN | SVM | Árbol de Decisión | KNN |
 |:-:|:-:|:-:|:-:|:-:|:-:|
-| Precision | % | % | % | % | % |
-| F1-Score | % | % | % | % | % |
+| Precision | 90.58% | % | 95.63% | 82.78% | 90.36% |
+| F1-Score | 90.48% | % | 95.54% | 82.60% | 90.47% |
 
 </div>
 
@@ -50,9 +68,33 @@ OEEEEo
 
 | | Cara | Mascarilla | No Cara |
 |:-:|:-:|:-:|:-:|
-| Cara | 0 | 0 | 0 |
-| Mascarilla | 0 | 0 | 0 |
-| No Cara | 0 | 0 | 0 |
+| Cara | 16 | 0 | 0 |
+| Mascarilla | 0 | 12 | 0 |
+| No Cara | 0 | 0 | 13 |
 
-Matriz de confusion para --.
+Matriz de confusion para RNA.
+
+| | Cara | Mascarilla | No Cara |
+|:-:|:-:|:-:|:-:|
+| Cara | 16 | 0 | 0 |
+| Mascarilla | 0 | 12 | 0 |
+| No Cara | 0 | 0 | 13 |
+
+Matriz de confusion para SVM con kernel gausiano.
+
+| | Cara | Mascarilla | No Cara |
+|:-:|:-:|:-:|:-:|
+| Cara | 10 | 0 | 0 |
+| Mascarilla | 1 | 16 | 0 |
+| No Cara | 1 | 0 | 10 |
+
+Matriz de confusion para KNN.
+
+| | Cara | Mascarilla | No Cara |
+|:-:|:-:|:-:|:-:|
+| Cara | 19 | 0 | 0 |
+| Mascarilla | 1 | 11 | 2 |
+| No Cara | 1 | 1 | 5 |
+
+Matriz de confusion para Árboles de Decisión.
 </div>

@@ -11,7 +11,7 @@ hay diferentes extracciones:
 =#
 extraction = :A33;
 dataset_name="datasets/faces.data";
-change = true;
+change = false;
 if extraction==:A1
     x = 6;
     y = 7;
@@ -58,12 +58,12 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
+=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds; rep=:All);
-=#
 
 # Entrenamos svm
 modelHyperparameters = Dict();
