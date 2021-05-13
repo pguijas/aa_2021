@@ -2,7 +2,7 @@
 
 <div style="text-align:center">
 
-<img width="50%" src="img/UDC-emblema.jpeg"/>
+<img width="50%" src="img/UDC-Emblema.jpeg"/>
 
 </div>
 <br><br>
