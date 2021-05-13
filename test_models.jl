@@ -2,17 +2,6 @@ include("modulos/testing_models.jl")
 include("modulos/datasets.jl")
 include("modulos/attributes_from_dataset.jl")
 
-function createDataset(dataset_name::String, extraction::Symbol)
-    (inputs, targets) = getInputs("datasets"; extr=extraction);
-    println("Tamaños en la generación:");
-    println(size(inputs));
-    println(size(targets));
-    write_dataset(dataset_name,inputs,targets);
-    while (!isfile("datasets/faces.data"))
-        sleep(1);
-    end;
-end;
-
 #=
 hay diferentes extracciones:
     · :A1 (aproximación 1)
@@ -69,12 +58,12 @@ sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
 
 
-=#
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds; rep=:All);
 
 # Entrenamos los arboles de decision
 testingModels(:DecisionTree, Dict("maxDepth" => 20), inputs, targets, numFolds; rep=:All);
+=#
 
 # Entrenamos svm
 modelHyperparameters = Dict();
@@ -82,7 +71,7 @@ modelHyperparameters["kernel"] = "rbf";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 10;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-
+#=
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
@@ -96,3 +85,4 @@ modelHyperparameters["fstNeuron"] = 6;
 modelHyperparameters["maxNNxlayer"] = 12;
 modelHyperparameters["layers"] = 2;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
+=#

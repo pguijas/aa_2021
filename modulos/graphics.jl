@@ -78,3 +78,11 @@ function printAccStdRNA(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Arr
         display(m);
     end;
 end;
+
+
+function oneMetric(x::Array{Any,1}, result::Array{Any,1})
+    m = plot(x, result, title = "Convolutional Neural Network",label = "Accurracy");
+    xlabel!("Cycle");
+    ylabel!("Precision");
+    display(m);
+end;

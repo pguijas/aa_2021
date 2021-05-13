@@ -2,16 +2,6 @@ include("modulos/datasets.jl")
 include("modulos/attributes_from_dataset.jl")
 include("modulos/models_cross_validation.jl")
 
-function createDataset(dataset_name::String, extraction::Symbol)
-    (inputs, targets) = getInputs("datasets"; extr=extraction);
-    println("Tamaños en la generación:");
-    println(size(inputs));
-    println(size(targets));
-    write_dataset(dataset_name,inputs,targets);
-    while (!isfile("datasets/faces.data"))
-        sleep(1);
-    end;
-end;
 
 #=
 hay tres extracciones
@@ -19,7 +9,7 @@ hay tres extracciones
     · :A21 (aproximación 2 extracción 1)
     · :A22 (aproximación 2 extracción 2)
 =#
-extraction = :A21;
+extraction = :A33;
 dataset_name="datasets/faces.data";
 change = false;
 if extraction==:A1
@@ -28,9 +18,21 @@ if extraction==:A1
 elseif extraction==:A21
     x = 42;
     y = 43;
-elseif extraction==:A22
+elseif (extraction==:A22 || extraction==:A23)
     x = 36;
     y = 37;
+elseif extraction==:A31
+    x = 48;
+    y = 49;
+elseif extraction==:A32
+    x = 66;
+    y = 67;
+elseif extraction==:A33
+    x = 72;
+    y = 73;
+elseif extraction==:A34
+    x = 84;
+    y = 85;
 end;
 if (!isfile(dataset_name) || change)
     createDataset(dataset_name,extraction);

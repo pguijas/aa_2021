@@ -4,11 +4,10 @@ using FileIO;
 
 
 function toFloatArray(images::Array{Array{RGB{Normed{UInt8,8}},2},1})
-    size = length(images);
-    floatArray = Array{Float32,4}(undef, 150, 150, 3, size);
-    for i in 1:size
-        #@assert (size(images[i])==(150,150)) "Las imagenes no tienen tamaño 150x150";
-        # ns pq esto no funciona
+    siz = length(images);
+    floatArray = Array{Float32,4}(undef, 150, 150, 3, siz);
+    for i in 1:siz
+        @assert (size(images[i])==(150,150)) "Las imagenes no tienen tamaño 150x150";
         floatArray[:,:,1,i] .= convert(Array{Float32,2}, red.(images[i]));
         floatArray[:,:,2,i] .= convert(Array{Float32,2}, green.(images[i]));
         floatArray[:,:,3,i] .= convert(Array{Float32,2}, blue.(images[i]));

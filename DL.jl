@@ -3,14 +3,18 @@ using Flux: onehotbatch, onecold, crossentropy
 using JLD2, FileIO
 using Statistics: mean
 
+include("modulos/dataset_DL.jl");
+include("modulos/graphics.jl");
+
 #===============================================================================
 COSAS:
     · en toFloatArray no me deja hacer un assert de una comp de ints:  MethodError: objects of type Int64 are not callable
+    · ¿por qué filtros de 3x3?
+    · ¿Están bien las capas convolucionales?
 
 ===============================================================================#
 
 
-include("modulos/dataset_DL.jl")
 
 interval = 6;
 (train_imgs, train_labels,
@@ -96,10 +100,13 @@ criterioFin = false;
 numCiclo = 0;
 numCicloUltimaMejora = 0;
 mejorModelo = nothing;
+array_ciclos = [];
+array_acc = [];
 
 while (!criterioFin)
 
-    global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo, criterioFin;
+    global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo,
+        criterioFin, array_ciclos, array_acc;
 
     Flux.train!(loss, params(modelo), train_set, opt);
 
@@ -107,6 +114,9 @@ while (!criterioFin)
 
     precisionEntrenamiento = mean(accuracy.(train_set));
     println("Ciclo ", numCiclo, ": Precision en el conjunto de entrenamiento: ", 100*precisionEntrenamiento, " %");
+
+    push!(array_ciclos, numCiclo);
+    push!(array_acc, precisionEntrenamiento);
 
     if (precisionEntrenamiento >= mejorPrecision)
         mejorPrecision = precisionEntrenamiento;
@@ -132,3 +142,5 @@ while (!criterioFin)
         criterioFin = true;
     end;
 end;
+
+oneMetric(array_ciclos, array_acc);

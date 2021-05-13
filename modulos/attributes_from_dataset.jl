@@ -3,6 +3,21 @@ using FileIO
 using JLD2
 using Statistics: std, mean, var
 
+
+# =============================================================================
+
+# Funcion para crear el dataset directamente, si existe.
+function createDataset(dataset_name::String, extraction::Symbol)
+    (inputs, targets) = getInputs("datasets"; extr=extraction);
+    println("Tamaños en la generación:");
+    println(size(inputs));
+    println(size(targets));
+    write_dataset(dataset_name,inputs,targets);
+    while (!isfile("datasets/faces.data"))
+        sleep(1);
+    end;
+end;
+
 # =============================================================================
 
 # Funcion para convertir una foto (en RGB) en un Array de Float64
@@ -27,7 +42,7 @@ function loadFolderImages(folderName::String, extr::Symbol)
     images = [];
     # Para cada fichero que detecte en la carpeta dada
     for fileName in readdir(folderName)
-        println(fileName)
+        #println(fileName)
         if isImageExtension(fileName)
             # Leemos la imagen
             image = load(string(folderName, "/", fileName));
@@ -90,10 +105,10 @@ end
 
 # =============================================================================
 
-# Funcion que obtiene una matriz Nx6, donde N es el numero de elementos
-# (positivos + negativos) y 6 es el numero de columnas (varianza, media y
+# Funcion que obtiene una matriz NxM, donde N es el numero de elementos
+# (positivos + negativos) y M es el numero de columnas (varianza, media y
 # desviacion tipica) para cada canal RGB y un vector de targets
-function getInputs(path::String; extr::Symbol=:A21)
+function getInputs(path::String; extr::Symbol=:A33)
     # Obtenemos todas las fotos clasificadas en positivas y negativas
     (caraDataset, negativeDataset, mascarillaDataset) = loadDataset(path, extr);
     # Generamos la matriz de inputs y targets
@@ -152,6 +167,10 @@ function getInputs(path::String; extr::Symbol=:A21)
     return (inputs,targets)
 end
 
+# ==============================================================================
+
+# Funcion que dado un nombre de archivo, y unos inputs y targets los escribe
+# en el archivo dado.
 function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Array{String, 1})
     f = open(file_name, "w")
     for line in 1:size(inputs,1)
@@ -165,9 +184,10 @@ function write_dataset(file_name::String,inputs::Array{Float64, 2},targets::Arra
     end
 end;
 
+# ==============================================================================
 
-# Segunda aproximación
-
+# Función para recolectar características de un array de imágenes (igual que
+# hacíamos antes solo que ahora con un array)
 function getAttrFromImgv2(array)
     # Para cada imágen, sacamos las características y las juntamos todas en
     # un solo array de atributos
@@ -177,10 +197,12 @@ function getAttrFromImgv2(array)
             push!(attr, 𝑋);
         end;
     end;
-    #@show(attr);
     return attr;
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_1(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -205,6 +227,9 @@ function face_features_1(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Floa
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -227,6 +252,9 @@ function face_features_2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Floa
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_3(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -251,6 +279,9 @@ function face_features_3(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Floa
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_masc(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -279,6 +310,9 @@ function face_features_masc(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{F
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_masc2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -313,6 +347,9 @@ function face_features_masc2(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
+
+# Función que realiza una extracción de características dada una imágen
 function face_features_masc3(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
@@ -349,7 +386,9 @@ function face_features_masc3(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{
     return imageToColorArray.(array_of_images);
 end;
 
+# ==============================================================================
 
+# Función que realiza una extracción de características dada una imágen
 function face_features_masc4(image::Array{RGB{Normed{UInt8,8}},2})::Array{Array{Float64, 3}}
 
     # devolvemos un array de imágenes
