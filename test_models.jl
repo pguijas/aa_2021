@@ -56,9 +56,9 @@ Posibles representaciones
 Para sacar los gráficos 3D:
 sudo apt-get install python3-matplotlib
 Pkg.add("PyPlot") || Pkg.build("PyPlot")
-
-
 =#
+
+
 # Entrenamos knn
 testingModels(:KNN, Dict("maxNeighbors" => 20), inputs, targets, numFolds; rep=:All);
 
@@ -71,7 +71,7 @@ modelHyperparameters["kernel"] = "rbf";
 modelHyperparameters["kernelDegree"] = 15;
 modelHyperparameters["maxGamma"] = 10;
 testingModels(:SVM, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-#=
+
 # Entrenamos las RR.NN.AA.
 modelHyperparameters = Dict();
 modelHyperparameters["fstNeuron"] = 1;
@@ -85,4 +85,3 @@ modelHyperparameters["fstNeuron"] = 6;
 modelHyperparameters["maxNNxlayer"] = 12;
 modelHyperparameters["layers"] = 2;
 testingModels(:ANN, modelHyperparameters, inputs, targets, numFolds; rep=:All);
-=#
