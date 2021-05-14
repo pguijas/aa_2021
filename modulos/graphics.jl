@@ -80,6 +80,17 @@ function printAccStdRNA(mean_acc::Array{Any,1}, sdev::Array{Any,1}, mean_f1::Arr
 end;
 
 
+function print_train_results(num_ciclos, trainingLosses, testLosses, trainingAccuracies, testAccuracies)
+    losses=plot(num_ciclos,[trainingLosses testLosses],title = "Loss",label = ["Training" "Test"],);
+    xlabel!("Ciclo");
+    ylabel!("Error(%)");
+    accuracy=plot(num_ciclos,[trainingAccuracies testAccuracies],title = "Accuracies",label = ["Training" "Test"],);
+    xlabel!("Ciclo");
+    ylabel!("Accuracies(%)");
+    display(plot(losses,accuracy));
+end;
+
+
 function oneMetric(x::Array{Any,1}, result::Array{Any,1})
     m = plot(x, result, title = "Convolutional Neural Network",label = "Accurracy");
     xlabel!("Cycle");

@@ -16,7 +16,7 @@ COSAS:
 
 
 
-interval = 6;
+interval = 8;
 (train_imgs, train_labels,
     test_imgs, test_labels) = getInputs("datasets", interval);
 
@@ -53,15 +53,16 @@ GC.gc();
 funcionTransferenciaCapasConvolucionales = relu;
 
 # Definimos la red con la funcion Chain, que concatena distintas capas
+
 modelo = Chain(
-    Conv((3, 3), 3=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    Conv((5, 5), 3=>16, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
-    Conv((3, 3), 16=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    Conv((5, 5), 16=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
-    Conv((3, 3), 32=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
+    Conv((5, 5), 32=>32, pad=(1,1), funcionTransferenciaCapasConvolucionales),
     MaxPool((2,2)),
     x -> reshape(x, :, size(x, 4)),
-    Dense(10368, 3),
+    Dense(9248, 3),
     softmax
 );
 
@@ -82,12 +83,16 @@ for numCapa in 1:numCapas
     salidaCapa = capa(entradaCapa);
     println("      La salida de esta capa tiene dimension ", size(salidaCapa));
     entradaCapa = salidaCapa;
-end
+end;
 
 modelo(train_set[numBatchCoger][1][:,:,:,numImagenEnEseBatch]);
 
 loss(x, y) = crossentropy(modelo(x), y)
 accuracy(batch) = mean(onecold(modelo(batch[1])) .== onecold(batch[2]))
+
+function calculate_loss(array_of_tuples)
+    return loss(array_of_tuples[1], array_of_tuples[2]);
+end;
 
 println("Ciclo 0: Precision en el conjunto de entrenamiento: ", 100*mean(accuracy.(train_set)), " %");
 
@@ -100,13 +105,17 @@ criterioFin = false;
 numCiclo = 0;
 numCicloUltimaMejora = 0;
 mejorModelo = nothing;
-array_ciclos = [];
-array_acc = [];
+num_ciclos = [];
+trainingLosses = [];
+testLosses = [];
+trainingAccuracies = [];
+testAccuracies = [];
 
 while (!criterioFin)
 
     global numCicloUltimaMejora, numCiclo, mejorPrecision, mejorModelo,
-        criterioFin, array_ciclos, array_acc;
+        criterioFin, num_ciclos, trainingLosses, testLosses,
+        trainingAccuracies, testAccuracies;
 
     Flux.train!(loss, params(modelo), train_set, opt);
 
@@ -114,24 +123,29 @@ while (!criterioFin)
 
     precisionEntrenamiento = mean(accuracy.(train_set));
     println("Ciclo ", numCiclo, ": Precision en el conjunto de entrenamiento: ", 100*precisionEntrenamiento, " %");
+    precisionTest = accuracy(test_set);
+    println("   Precision en el conjunto de test: ", 100*precisionTest, " %");
 
-    push!(array_ciclos, numCiclo);
-    push!(array_acc, precisionEntrenamiento);
+    # Calculamos las métricas
+    push!(num_ciclos, numCiclo);
+    push!(trainingAccuracies, precisionEntrenamiento);
+    push!(testAccuracies, precisionTest);
+    push!(trainingLosses, mean(calculate_loss.(train_set)));
+    push!(testLosses, mean(calculate_loss(test_set)));
 
-    if (precisionEntrenamiento >= mejorPrecision)
+    if (precisionEntrenamiento > mejorPrecision)
         mejorPrecision = precisionEntrenamiento;
-        precisionTest = accuracy(test_set);
         println("   Mejora en el conjunto de entrenamiento -> Precision en el conjunto de test: ", 100*precisionTest, " %");
         mejorModelo = deepcopy(modelo);
         numCicloUltimaMejora = numCiclo;
     end;
-
+#=
     if (numCiclo - numCicloUltimaMejora >= 5) && (opt.eta > 1e-6)
         opt.eta /= 10.0
         println("   No se ha mejorado en 5 ciclos, se baja la tasa de aprendizaje a ", opt.eta);
         numCicloUltimaMejora = numCiclo;
     end;
-
+=#
     if (precisionEntrenamiento >= 0.999)
         println("   Se para el entenamiento por haber llegado a una precision de 99.9%")
         criterioFin = true;
@@ -143,4 +157,4 @@ while (!criterioFin)
     end;
 end;
 
-oneMetric(array_ciclos, array_acc);
+print_train_results(num_ciclos, trainingLosses, testLosses, trainingAccuracies, testAccuracies);
