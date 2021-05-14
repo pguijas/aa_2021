@@ -1,7 +1,7 @@
 # Sistema de detección de mascarillas en rostros
 <br>
 <p align="center">
-  <img width="40%" src="img/UDC-emblema.jpeg"/>
+  <img width="40%" src="img/UDC-Emblema.jpeg"/>
 <br><br>
 
 ![Build Status](https://shields.io/badge/build-passing-brightgreen)
@@ -85,9 +85,9 @@ Matriz de confusion para SVM con kernel gausiano.
 
 | | Cara | Mascarilla | No Cara |
 |:-:|:-:|:-:|:-:|
-| Cara | 10 | 0 | 0 |
-| Mascarilla | 1 | 16 | 0 |
-| No Cara | 1 | 0 | 10 |
+| Cara | 11 | 0 | 0 |
+| Mascarilla | 0 | 15 | 0 |
+| No Cara | 1 | 1 | 10 |
 
 Matriz de confusion para KNN.
 
