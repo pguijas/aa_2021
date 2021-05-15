@@ -54,7 +54,7 @@ cd datasets
 unzip datasets.zip
 ```
 ## **Resultados**
-Resultados
+Se muestran a continuación las bondades finales para los distintos modelos con sus parámetros óptimos (en las *CNN* el resultado de la precisión es tan solo en un entrenamiento).
 <div align="center">
 
 | | RNA | CNN | SVM | Árbol de Decisión | KNN |
@@ -64,8 +64,7 @@ Resultados
 
 </div>
 
-
-OEEEEo
+En los siguientes cuadros mostramos las matrices de confusión finales para nuestros modelos, ejecutando también cada uno de ellos con los parámetros óptimos:
 
 <div align="center">
 
