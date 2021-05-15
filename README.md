@@ -41,7 +41,7 @@ La Base de Datos (BD) del problema ([ver aquí](https://mega.nz/fm/wdYAALxL)) ha
 ![cara](img/ejemplo_cara.jpeg)  |  ![cara con mascarilla](img/ejemplo_mascarilla.png) | ![no cara](img/ejemplo_no_cara.jpeg)
 
 
-Para generar el archivo faces.data (ya existe en el repositorio), ya sea porque se quiere cambiar la extracción o por el motivo que sea, será necesario descargar el dataset con imágenes. Actualmente se aplica la extracción de características que aparece en la siguiente imagen, aun que se pueden aplicar hasta 8 extracciones diferentes.
+Para generar el archivo faces.data (ya existe en el repositorio), ya sea porque se quiere cambiar la extracción o por el motivo que sea, será necesario descargar el dataset con imágenes. También será necesario descargarlo si queremos ejecutar el modelo de CNN, que se encuentra en <code>DL.jl</code>, ya que a estos modelos se les pasan las imágenes en 'crudo'. Actualmente se aplica la extracción de características que aparece en la siguiente imagen, aun que se pueden aplicar hasta 8 extracciones diferentes.
 
 <p align="center">
   <img width="40%" src="img/char_hec.jpeg"/>
@@ -59,8 +59,8 @@ Resultados
 
 | | RNA | CNN | SVM | Árbol de Decisión | KNN |
 |:-:|:-:|:-:|:-:|:-:|:-:|
-| Precision | 91.12% | 98.55% | 95.63% | 82.78% | 90.36% |
-| F1-Score | 90.95% | % | 95.54% | 82.60% | 90.47% |
+| Precision | 91.12% | 100% | 95.63% | 82.78% | 90.36% |
+| F1-Score | 90.95% | N.A.% | 95.54% | 82.60% | 90.47% |
 
 </div>
 
