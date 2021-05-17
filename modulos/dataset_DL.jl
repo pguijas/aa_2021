@@ -1,8 +1,6 @@
 using Images;
 using FileIO;
 
-
-
 function toFloatArray(images::Array{Array{RGB{Normed{UInt8,8}},2},1})
     siz = length(images);
     floatArray = Array{Float32,4}(undef, 150, 150, 3, siz);

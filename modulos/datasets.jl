@@ -1,3 +1,8 @@
+using FileIO;
+using DelimitedFiles;
+using Statistics: mean, std;
+using Random: randperm;
+
 # =============================================================================
 # datasets.jl -> Funciones útiles aplicables a un dataset:
 #   - oneHotEncoding
@@ -9,15 +14,6 @@
 #   - holdOut (sobrecargada 2 y 3 params)
 #   - validacion cruzada(añadir en un futuro) -> FALTAS TU
 #   - classifyOutputs
-# =============================================================================
-
-using FileIO;
-using DelimitedFiles;
-using Statistics: mean, std;
-using Random: randperm;
-
-# =============================================================================
-# Transformar dataset en formato adecuado (oneHotEncoding)
 # =============================================================================
 
 
@@ -34,7 +30,7 @@ function oneHotEncoding(feature::Array{Any,1}, classes::Array{Any,1})
     # Primero se comprueba que todos los elementos del vector esten en el vector de clases (linea adaptada del final de la practica 4)
     @assert(all([in(value, classes) for value in feature]));
     numClasses = length(classes);
-    
+
     @assert(numClasses>1)
     if (numClasses==2)
         # Si solo hay dos clases, se devuelve una matriz con una columna

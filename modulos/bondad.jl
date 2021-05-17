@@ -1,3 +1,5 @@
+include("datasets.jl");
+
 # =============================================================================
 # bondad.jl -> Funciones útiles calcular la bondad de un sistema:
 #   - accuracy (precisión)
@@ -7,13 +9,6 @@
 # Este módulo solo trabaja con booleanos, a excepción de accuracy que lo necesita la
 # rna para su entrenamientos
 #
-# =============================================================================
-
-# PEDRO ACUERDATE DE REVISAR TODAS LAS ConfusionMatrix
-# CONCRETAMENTE, REVISAR -> confusionMatrix(outputs::Array{Any,1}, targets::Array{Any,1}; weighted::Bool=true)
-
-# =============================================================================
-# Accuracy
 # =============================================================================
 
 #Precisión bool 1d
