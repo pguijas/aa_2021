@@ -34,7 +34,7 @@ Debido a las circunstancias en las que nos encontramos, reconocer caras con masc
 Para resolver el problema, utilizaremos una Redes de Neuronas Artificiales (RR.NN.AA.) *densas* y Redes de Neuronas Convolucionales (C.N.N.), Máquinas de Soporte Vectorial (SVM) o en inglés *Support Vector Machine*, k-vecinos próximos (KNN), en inglés *k-Nearest Neighbors*. En las RR.NN.AA., probaremos con distintas arquitecturas, de forma que nos quedemos con la configuración que mejores resultados obtenga y mejor se adapte al problema.
 
 ## **Dataset**
-La Base de Datos (BD) del problema ([ver aquí](https://mega.nz/fm/wdYAALxL)) ha sido realizada por nosostros mismos. Para crear la base de datos, elegimos minuciosamente las imágenes siguiendo las pautas previamente establecidas en las restricciones, sacando las fotos de nuestros conocidos o familiares y de internet en páginas como [*This person does not exist*](https://thispersondoesnotexist.com). Cuenta con 140 imágenes de caras sin mascarillas, 140 imágenes de no-caras y 140 imágenes de caras con mascarillas.
+La Base de Datos (BD) del problema ([ver aquí](https://mega.nz/folder/AMR1SQRI#OqA4ot45EhqSRyshQmN4RA)) ha sido realizada por nosostros mismos. Para crear la base de datos, elegimos minuciosamente las imágenes siguiendo las pautas previamente establecidas en las restricciones, sacando las fotos de nuestros conocidos o familiares y de internet en páginas como [*This person does not exist*](https://thispersondoesnotexist.com). Cuenta con 140 imágenes de caras sin mascarillas, 140 imágenes de no-caras y 140 imágenes de caras con mascarillas.
 
 | Cara | Cara con mascarilla | No cara |
 :-:|:-:|:-:
@@ -60,7 +60,7 @@ Se muestran a continuación las bondades finales para los distintos modelos con 
 | | RNA | CNN | SVM | Árbol de Decisión | KNN |
 |:-:|:-:|:-:|:-:|:-:|:-:|
 | Precision | 91.12% | 100% | 95.63% | 82.78% | 90.36% |
-| F1-Score | 90.95% | N.A.% | 95.54% | 82.60% | 90.47% |
+| F1-Score | 90.95% | 100% | 95.54% | 82.60% | 90.47% |
 
 </div>
 
